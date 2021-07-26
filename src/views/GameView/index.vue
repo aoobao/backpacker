@@ -1,0 +1,149 @@
+<template>
+  <div class="container">
+    <!-- 游戏页面 -->
+    <ThreeWrap>
+      <WorkMap @over="map1Init" />
+    </ThreeWrap>
+    <HandUpDisplay v-if="map1Finish" />
+    <!-- <div class="btns">
+      <button @click="printCamera">相机</button>
+    </div> -->
+  </div>
+</template>
+<script lang="ts">
+// import { PersonType } from '@/assets/types'
+import { computed, defineComponent, onBeforeUnmount, ref, watch } from 'vue'
+import { useInjector } from '@/store/hook'
+import { GameStateStore } from '@/store/hooks/game-info'
+import ThreeWrap from './ThreeWrap.vue'
+import WorkMap from './WorkMap'
+import HandUpDisplay from './hand-up-display.vue'
+import { printCamera, getAngle, createAnimation, delay } from '@/assets/index'
+import { FileItem, getFileById } from '@/assets/preload'
+import Player from '@/assets/object/Player'
+import { THREE } from '@/assets/three/lib'
+import { ACTION, bus } from '@/assets/bus'
+
+export default defineComponent({
+  components: { ThreeWrap, WorkMap, HandUpDisplay },
+  setup() {
+    const store = useInjector(GameStateStore)
+    const map1Finish = ref(false)
+    const isLoad = ref(false)
+    const map2Finish = ref(true)
+    let playerFile: FileItem
+    let players: Array<Player>
+    // const playerFile = await getFileById('player')
+    getFileById('player').then(file => {
+      playerFile = file
+      isLoad.value = true
+    })
+    const isFinish = computed(() => {
+      return map1Finish.value && isLoad.value && map2Finish.value
+    })
+    const map1Init = () => {
+      map1Finish.value = true
+    }
+    watch(
+      () => isFinish.value,
+      val => {
+        if (val) {
+          init()
+        }
+      },
+    )
+
+    const init = () => {
+      if (!store) throw new Error('未获取GameStateStore')
+
+      players = store.gameState.players.map(p => {
+        const object = playerFile.object.scene as THREE.Scene
+        return new Player({
+          player: p,
+          object: object,
+          map1: store.map1!,
+        })
+      })
+      bus.on(ACTION.RENDER, render)
+      gameLoop()
+    }
+
+    const gameLoop = async () => {
+      const env = store?.env
+      if (!env) throw new Error('未获取3d环境')
+      const currentPlayerId = store?.gameState.currentPlayerId
+      const currentIndex = players.findIndex(t => t.player.id === currentPlayerId)
+      const player = players[currentIndex]
+
+      const map = store!.map1!
+      const control = env.control!
+      // 聚焦当前玩家
+      // const position = player.instance.position
+      await delay(1)
+
+      control.zoomTo(1.7, true)
+
+      await rotateMap(map, player.instance.position)
+
+      // console.log(angle)
+
+      // createAnimation(map.rotation, { z: rotationZ }, 10000)
+
+      // map.rotation.z = angle * THREE.MathUtils.DEG2RAD
+
+      // console.log(angle)
+
+      //
+      // const control = env.control!
+      // const camera = env.camera!
+      // const position = player.instance.position
+      // control.setLookAt(position.x, position.y, position.z, 0, 0, 50, true)
+      // control.zoom(0.4, true)
+      // control.fitToBox()
+    }
+
+    // 旋转地图 使得照相机聚焦position
+    const rotateMap = (map: THREE.Mesh, position: THREE.Vector3, duration = 1000): Promise<void> => {
+      return new Promise(resolve => {
+        let angle = (360 + getAngle(0, 0, position.x, position.y) - 90) % 360
+        if (angle > 180) {
+          angle = angle - 360
+        }
+
+        const rotationZ = angle * THREE.MathUtils.DEG2RAD
+        const tween = createAnimation(map.rotation, { z: rotationZ }, duration)
+        tween.onComplete(() => {
+          resolve()
+        })
+      })
+    }
+
+    const render = () => {
+      // console.log('render')
+    }
+
+    onBeforeUnmount(() => {
+      bus.off(ACTION.RENDER, render)
+    })
+
+    return {
+      map1Init,
+      printCamera,
+      gameState: store?.gameState,
+      map1Finish,
+    }
+  },
+})
+</script>
+<style lang="scss" scoped>
+.container {
+  width: 100%;
+  height: 100%;
+
+  .btns {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+</style>

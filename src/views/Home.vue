@@ -1,18 +1,35 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  <div class="container">
+    <GameMenu v-if="status === 0" @start-new="startNewGame" />
+    <GameView v-if="status === 1" />
   </div>
 </template>
-
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
-import HelloWorld from "@/components/HelloWorld.vue"; // @ is an alias to /src
+import { defineComponent, ref } from 'vue'
+import GameMenu from './GameMenu.vue'
+import GameView from './GameView/index.vue'
+export default defineComponent({
+  components: { GameMenu, GameView },
+  setup() {
+    // 0 游戏菜单 1 游戏进行中 4 游戏结束
+    const status = ref(0)
 
-@Options({
-  components: {
-    HelloWorld,
+    const startNewGame = () => {
+      // console.log('start')
+      status.value = 1
+    }
+
+    return {
+      status,
+      startNewGame,
+    }
   },
 })
-export default class Home extends Vue {}
 </script>
+<style lang="scss" scoped>
+.container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+</style>

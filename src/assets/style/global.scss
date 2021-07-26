@@ -1,0 +1,25 @@
+@font-face {
+  font-family: fx-led;
+  src: url('../font/FX-LED.TTF');
+}
+
+.led {
+  font-family: fx-led;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.pointer-none {
+  pointer-events: none;
+}
+
+.pointer {
+  pointer-events: auto;
+}
