@@ -1,3 +1,4 @@
+<script lang="ts">
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import { defineComponent, ref, onBeforeMount, onMounted } from 'vue'
@@ -102,10 +103,21 @@ export default defineComponent({
       env?.scene.remove(map)
     })
 
-    function lookAtPosition(position: THREE.Vector3): void {
+    function lookAtPosition(point: THREE.Vector3): void {
       const env = store?.env
       const control = env?.control
       if (control) {
+        const t = Math.sqrt(Math.pow(point.z, 2) + Math.pow(point.x, 2))
+        const polarVec = new THREE.Vector2(-point.y, t)
+        const polarRadian = polarVec.angle()
+        const azimuthVec = new THREE.Vector2(point.z, point.x)
+        let azimuthRadian = azimuthVec.angle() + Math.PI
+
+        const num = Math.round((control.azimuthAngle - azimuthRadian) / (2 * Math.PI))
+        azimuthRadian = num * 2 * Math.PI + azimuthRadian
+
+        control.rotateTo(azimuthRadian, polarRadian, true)
+
         // control.setLookAt(0, 0, 100, position.x, position.y, position.z, true)
         // control.zoomTo(1, true)
       } else {
@@ -115,10 +127,11 @@ export default defineComponent({
 
     return {
       lookAtPosition,
-      isLoad
+      isLoad,
     }
   },
   render() {
     return null
   },
 })
+</script>

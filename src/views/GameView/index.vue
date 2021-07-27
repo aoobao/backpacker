@@ -2,7 +2,7 @@
   <div class="container">
     <!-- 游戏页面 -->
     <ThreeWrap>
-      <WorkMap @over="map1Init" />
+      <WorkMap @over="map1Init" ref="workMap" />
     </ThreeWrap>
     <HandUpDisplay v-if="map1Finish" />
     <!-- <div class="btns">
@@ -16,7 +16,7 @@ import { computed, defineComponent, onBeforeUnmount, ref, watch } from 'vue'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import ThreeWrap from './ThreeWrap.vue'
-import WorkMap from './WorkMap'
+import WorkMap from './WorkMap.vue'
 import HandUpDisplay from './hand-up-display.vue'
 import { printCamera, getAngle, createAnimation, delay } from '@/assets/index'
 import { FileItem, getFileById } from '@/assets/preload'
@@ -27,6 +27,7 @@ import { ACTION, bus } from '@/assets/bus'
 export default defineComponent({
   components: { ThreeWrap, WorkMap, HandUpDisplay },
   setup() {
+    const workMap = ref<InstanceType<typeof WorkMap>>()
     const store = useInjector(GameStateStore)
     const map1Finish = ref(false)
     const isLoad = ref(false)
@@ -75,47 +76,9 @@ export default defineComponent({
       const currentIndex = players.findIndex(t => t.player.id === currentPlayerId)
       const player = players[currentIndex]
 
-      const map = store!.map1!
-      const control = env.control!
-      // 聚焦当前玩家
-      // const position = player.instance.position
       await delay(1)
-
-      control.zoomTo(1.7, true)
-
-      await rotateMap(map, player.instance.position)
-
-      // console.log(angle)
-
-      // createAnimation(map.rotation, { z: rotationZ }, 10000)
-
-      // map.rotation.z = angle * THREE.MathUtils.DEG2RAD
-
-      // console.log(angle)
-
-      //
-      // const control = env.control!
-      // const camera = env.camera!
-      // const position = player.instance.position
-      // control.setLookAt(position.x, position.y, position.z, 0, 0, 50, true)
-      // control.zoom(0.4, true)
-      // control.fitToBox()
-    }
-
-    // 旋转地图 使得照相机聚焦position
-    const rotateMap = (map: THREE.Mesh, position: THREE.Vector3, duration = 1000): Promise<void> => {
-      return new Promise(resolve => {
-        let angle = (360 + getAngle(0, 0, position.x, position.y) - 90) % 360
-        if (angle > 180) {
-          angle = angle - 360
-        }
-
-        const rotationZ = angle * THREE.MathUtils.DEG2RAD
-        const tween = createAnimation(map.rotation, { z: rotationZ }, duration)
-        tween.onComplete(() => {
-          resolve()
-        })
-      })
+      // 聚焦当前玩家
+      workMap.value!.lookAtPosition(player.instance.position)
     }
 
     const render = () => {
@@ -131,6 +94,7 @@ export default defineComponent({
       printCamera,
       gameState: store?.gameState,
       map1Finish,
+      workMap,
     }
   },
 })
