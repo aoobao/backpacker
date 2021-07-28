@@ -25,6 +25,11 @@ export const FILE_LIST: Array<FileItem> = [
     path: require('@/assets/image/logo.png'),
     type: FILE_TYPE.IMAGE,
   },
+  // {
+  //   id: 'cube-material',
+  //   path: require('@/assets/image/material/cube-material.jpg'),
+  //   type: FILE_TYPE.IMAGE,
+  // },
 ]
 
 export function preLoadAllFile(onProgress?: (total: number, finishCount: number) => void) {
@@ -60,6 +65,15 @@ export function preLoadAllFile(onProgress?: (total: number, finishCount: number)
         })
     }
   })
+}
+
+export function getFile(id: string) {
+  const file = FILE_LIST.find(t => t.id === id)
+  if (!file) throw new Error('id未找到')
+
+  if (!file.object) throw new Error('未预加载文件')
+
+  return file.object
 }
 
 export function getFileById(id: string): Promise<FileItem> {

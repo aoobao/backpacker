@@ -23,7 +23,7 @@ import { FileItem, getFileById } from '@/assets/preload'
 import Player from '@/assets/object/Player'
 import { THREE } from '@/assets/three/lib'
 import { ACTION, bus } from '@/assets/bus'
-
+import Cube from '@/assets/object/Cube'
 export default defineComponent({
   components: { ThreeWrap, WorkMap, HandUpDisplay },
   setup() {
@@ -34,6 +34,7 @@ export default defineComponent({
     const map2Finish = ref(true)
     let playerFile: FileItem
     let players: Array<Player>
+    let cube: Cube
     // const playerFile = await getFileById('player')
     getFileById('player').then(file => {
       playerFile = file
@@ -70,7 +71,9 @@ export default defineComponent({
     }
 
     const gameLoop = async () => {
-      const env = store?.env
+      if (!store) throw new Error('未获取GameStateStore')
+
+      const env = store.env
       if (!env) throw new Error('未获取3d环境')
       const currentPlayerId = store?.gameState.currentPlayerId
       const currentIndex = players.findIndex(t => t.player.id === currentPlayerId)
@@ -79,6 +82,11 @@ export default defineComponent({
       await delay(1)
       // 聚焦当前玩家
       workMap.value!.lookAtPosition(player.instance.position)
+
+      // 骰子
+      cube = new Cube({ map1: store.map1! })
+      cube.show()
+      // cube = new Cube({ map1: store.map1! })
     }
 
     const render = () => {

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #canvas {
+        /* 画布加个边框方便看 */
+        border: 1px solid #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+      const size = 200
+      const canvas = document.getElementById('canvas')
+      canvas.width = size * 2
+      canvas.height = size * 3
+      const ctx = canvas.getContext('2d')
+
+      // 1
+      createCircle(0, 0, size / 2, size / 2, 0.25, 'red')
+      // 2
+      createCircle(size, 0, (size / 3) * 1, size / 2, 0.1, '#000')
+      createCircle(size, 0, (size / 3) * 2, size / 2, 0.1, '#000')
+      // 3
+      createCircle(0, size, size / 4, size / 4, 0.1, '#000')
+      createCircle(0, size, size / 2, size / 2, 0.1, '#000')
+      createCircle(0, size, (size / 4) * 3, (size / 4) * 3, 0.1, '#000')
+
+      // 4
+      createCircle(size, size, (size / 3) * 1, (size / 3) * 1, 0.1, 'red')
+      createCircle(size, size, (size / 3) * 2, (size / 3) * 1, 0.1, 'red')
+      createCircle(size, size, (size / 3) * 1, (size / 3) * 2, 0.1, 'red')
+      createCircle(size, size, (size / 3) * 2, (size / 3) * 2, 0.1, 'red')
+
+      // 5
+      createCircle(0, size * 2, size / 4, size / 4, 0.1, '#000')
+      createCircle(0, size * 2, (size / 4) * 3, size / 4, 0.1, '#000')
+      createCircle(0, size * 2, size / 2, size / 2, 0.1, '#000')
+      createCircle(0, size * 2, size / 4, (size / 4) * 3, 0.1, '#000')
+      createCircle(0, size * 2, (size / 4) * 3, (size / 4) * 3, 0.1, '#000')
+
+      // 6
+      createCircle(size, size * 2, (size / 3) * 1, size / 4, 0.1, '#000')
+      createCircle(size, size * 2, (size / 3) * 2, size / 4, 0.1, '#000')
+      createCircle(size, size * 2, (size / 3) * 1, size / 2, 0.1, '#000')
+      createCircle(size, size * 2, (size / 3) * 2, size / 2, 0.1, '#000')
+      createCircle(size, size * 2, (size / 3) * 1, (size / 4) * 3, 0.1, '#000')
+      createCircle(size, size * 2, (size / 3) * 2, (size / 4) * 3, 0.1, '#000')
+
+      function createCircle(left, top, x, y, radius, color) {
+        ctx.save()
+        ctx.translate(left, top)
+
+        ctx.strokeRect(0, 0, size, size)  // 画边框
+
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, y, size * radius, 0, 2 * Math.PI)
+        ctx.fill()
+
+        ctx.restore()
+      }
+    </script>
+  </body>
+</html>

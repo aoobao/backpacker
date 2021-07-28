@@ -36,8 +36,8 @@ export default defineComponent({
       env.control.mouseButtons.wheel = CameraControls.ACTION.ZOOM
       env.control.mouseButtons.right = CameraControls.ACTION.NONE
       env.control.dollySpeed = 0.2
-      env.control.minPolarAngle = (0 * Math.PI) / 180
-      env.control.maxPolarAngle = (70 * Math.PI) / 180
+      // env.control.minPolarAngle = (0 * Math.PI) / 180
+      // env.control.maxPolarAngle = (70 * Math.PI) / 180
 
       // env.control.minAzimuthAngle = (-50 * Math.PI) / 180
       // env.control.maxAzimuthAngle = (50 * Math.PI) / 180
@@ -53,7 +53,7 @@ export default defineComponent({
       const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444)
       hemiLight.position.set(0, 20, 0)
 
-      directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+      directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
       if (env.camera) {
         const { x, y, z } = env.camera!.position
         directionalLight.position.set(x, y, z)
