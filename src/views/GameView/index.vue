@@ -81,12 +81,14 @@ export default defineComponent({
 
       await delay(1)
       // 聚焦当前玩家
-      workMap.value!.lookAtPosition(player.instance.position)
+      // workMap.value!.lookAtPosition(player.instance.position)
 
       // 骰子
       cube = new Cube({ map1: store.map1! })
-      cube.show()
-      // cube = new Cube({ map1: store.map1! })
+
+      await cube.show(store.physicsWorld!, Math.random())
+
+      const value = cube.getValue()
     }
 
     const render = () => {

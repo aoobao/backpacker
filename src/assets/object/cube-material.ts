@@ -3,17 +3,32 @@ const size = 200
 function createCanvas() {
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')
+
+  if (!ctx) throw new Error('画布对象创建失败')
   canvas.width = size
   canvas.height = size
 
-  const grd = ctx?.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size * 2)
-  grd!.addColorStop(0, '#fff')
+  ctx.save()
 
-  grd!.addColorStop(1, '#999')
+  const grd = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size * 2)
+  grd.addColorStop(0, '#fff')
 
-  ctx!.fillStyle = grd!
+  grd.addColorStop(1, '#999')
 
-  ctx?.fillRect(0, 0, size * 2, size * 2)
+  ctx.fillStyle = grd
+
+  ctx.fillRect(0, 0, size * 2, size * 2)
+
+  ctx.strokeStyle = '#ccc'
+  ctx.lineWidth = 1
+
+  ctx.shadowBlur = 20
+  ctx.shadowColor = 'black'
+
+  // ctx.sto
+  ctx.strokeRect(1, 1, size - 2, size - 2)
+
+  ctx.restore()
 
   return {
     canvas,

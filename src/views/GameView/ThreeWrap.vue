@@ -13,6 +13,9 @@ import { bus, ACTION } from '@/assets/bus'
 import { THREE, CameraControls } from '@/assets/three/lib'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
+import Stats from 'stats.js'
+import PhysicsWorld from '@/assets/physics'
+// import CANNON from 'cannon'
 // import { cameraJSON } from '@/assets/object.json'
 export default defineComponent({
   setup() {
@@ -62,6 +65,11 @@ export default defineComponent({
       env.scene.add(light, hemiLight, directionalLight)
     }
 
+    const initPhysicsWorld = () => {
+      const physicsWorld = new PhysicsWorld()
+      store!.setPhysicsWorld(physicsWorld)
+    }
+
     const resetSize = () => {
       const dom = wrap.value
       if (!dom || !env) return
@@ -69,25 +77,6 @@ export default defineComponent({
       env.height = dom.offsetHeight
 
       env.renderer.setSize(env.width, env.height)
-    }
-
-    const render = (timer?: number) => {
-      const delta = env.clock.getDelta()
-      TWEEN.update(timer)
-      bus.emit(ACTION.RENDER, { delta })
-
-      if (env.control && env.camera) {
-        const camera = env.camera
-        const hasUpdated = env.control.update(delta)
-        if (hasUpdated) {
-          if (directionalLight) {
-            const { x, y, z } = camera.position
-            directionalLight.position.set(x, y, z)
-          }
-        }
-        env.renderer?.render(env.scene, camera)
-      }
-      tick = requestAnimationFrame(render)
     }
 
     onMounted(() => {
@@ -98,6 +87,7 @@ export default defineComponent({
 
       initCameraAndControls()
       initLight()
+      initPhysicsWorld()
 
       store?.setEnv(env)
 
@@ -110,7 +100,37 @@ export default defineComponent({
       const axesHelper = new THREE.AxesHelper(500)
       env.scene.add(axesHelper)
 
-      render()
+      tick = requestAnimationFrame(animate)
+
+      // const stats = new Stats()
+      // stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+      // document.body.appendChild(stats.dom)
+
+      function animate(timer: number) {
+        // stats.begin()
+        render(timer)
+        // stats.end()
+        tick = requestAnimationFrame(animate)
+      }
+
+      function render(timer: number) {
+        const delta = env.clock.getDelta()
+        TWEEN.update(timer)
+        bus.emit(ACTION.RENDER, { delta, timer })
+
+        if (env.control && env.camera) {
+          const camera = env.camera
+          const hasUpdated = env.control.update(delta)
+          if (hasUpdated) {
+            if (directionalLight) {
+              const { x, y, z } = camera.position
+              directionalLight.position.set(x, y, z)
+            }
+          }
+          env.renderer?.render(env.scene, camera)
+        }
+        // tick = requestAnimationFrame(render)
+      }
     })
 
     onBeforeUnmount(() => {

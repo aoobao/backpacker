@@ -21,6 +21,7 @@ export default defineComponent({
     const mapMaterial = new THREE.MeshBasicMaterial({ color: 0x3f4470, side: THREE.DoubleSide })
     const map = new THREE.Mesh(mapGeometry, mapMaterial)
 
+
     // logo
     const logoGeometry = new THREE.PlaneGeometry(140, 82)
     const logoTexture = loader.load(require('@/assets/image/logo.png'))
@@ -107,16 +108,16 @@ export default defineComponent({
       const env = store?.env
       const control = env?.control
       if (control) {
-        const t = Math.sqrt(Math.pow(point.z, 2) + Math.pow(point.x, 2))
-        const polarVec = new THREE.Vector2(-point.y, t)
-        const polarRadian = polarVec.angle()
+        // const t = Math.sqrt(Math.pow(point.z, 2) + Math.pow(point.x, 2))
+        // const polarVec = new THREE.Vector2(-point.y, t)
+        // const polarRadian = polarVec.angle()
         const azimuthVec = new THREE.Vector2(point.z, point.x)
         let azimuthRadian = azimuthVec.angle() + Math.PI
 
         const num = Math.round((control.azimuthAngle - azimuthRadian) / (2 * Math.PI))
         azimuthRadian = num * 2 * Math.PI + azimuthRadian
 
-        control.rotateTo(azimuthRadian, polarRadian, true)
+        control.rotateTo(azimuthRadian, control.polarAngle, true)
 
         // control.setLookAt(0, 0, 100, position.x, position.y, position.z, true)
         // control.zoomTo(1, true)

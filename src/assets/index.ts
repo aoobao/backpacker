@@ -39,6 +39,10 @@ export function randBetween(min: number, max: number) {
 
   return min + num
 }
+// 返回1 or -1
+export function randPM() {
+  return Math.random() > 0.5 ? 1 : -1
+}
 
 export function delay(second: number): Promise<void> {
   return new Promise(resolve => {

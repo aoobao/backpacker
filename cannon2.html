@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/three@0.130.1/build/three.js"></script>
+    <script src="https://unpkg.com/cannon@0.6.2/build/cannon.js"></script>
+    <script src="https://unpkg.com/camera-controls@1.30.0/dist/camera-controls.js"></script>
+    <script>
+      CameraControls.install({ THREE: THREE })
+
+      const clock = new THREE.Clock()
+      const scene = new THREE.Scene()
+      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000)
+
+      camera.position.set(987.9305681257798,59.79074988533121,-41.853258322169594)
+      camera.up.set(0, 1, 0)
+
+      camera.lookAt(0, 0, 0)
+
+      const light = new THREE.AmbientLight(0x404040, 0.5)
+      light.name = 'ambient-light'
+
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444)
+      hemiLight.position.set(0, 20, 0)
+
+      scene.add(light, hemiLight)
+
+      const renderer = new THREE.WebGLRenderer()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+      document.body.appendChild(renderer.domElement)
+
+      const cameraControls = new CameraControls(camera, renderer.domElement)
+
+      const axesHelper = new THREE.AxesHelper(500)
+      scene.add(axesHelper)
+
+      // const size = 1000
+      // const divisions = 10
+      // const gridHelper = new THREE.GridHelper(size, divisions)
+
+      // gridHelper.rotation.x = (90 * Math.PI) / 180
+      // scene.add(gridHelper)
+      const geometry = new THREE.BoxGeometry(1000, 1, 1000)
+      const material = new THREE.MeshLambertMaterial({ color: 0xffffff })
+      const bodyMesh = new THREE.Mesh(geometry, material)
+      scene.add(bodyMesh)
+
+      const world = new CANNON.World()
+
+      // world.gravity.set(0, 0, -9.8)
+
+      world.gravity.set(0, -980, 0)
+
+      world.broadphase = new CANNON.NaiveBroadphase()
+      world.solver.iterations = 5
+      bodyGround = new CANNON.Body({
+        mass: 0,
+        position: new CANNON.Vec3(0, 0, 0),
+        shape: new CANNON.Box(new CANNON.Vec3(1000, 1, 1000)),
+      })
+      world.addBody(bodyGround)
+
+      function createBox() {
+        const geometry = new THREE.BoxGeometry(100, 100, 100)
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+        const cube = new THREE.Mesh(geometry, material)
+        cube.position.y = 200
+        scene.add(cube)
+
+        const bodyBox = new CANNON.Body({
+          mass: 1,
+          position: new CANNON.Vec3(cube.position.x, cube.position.y, cube.position.z),
+          shape: new CANNON.Box(new CANNON.Vec3(100, 100, 100)),
+        })
+
+        cube.userData = bodyBox
+
+        world.addBody(bodyBox)
+      }
+
+      createBox()
+
+      const animate = function () {
+        requestAnimationFrame(animate)
+        const delta = clock.getDelta()
+        const isUpdate = cameraControls.update(delta)
+
+        updatePhysics()
+
+        if (isUpdate) {
+          const c = camera
+          console.log(`${c.position.x},${c.position.y},${c.position.z}`)
+        }
+
+        renderer.render(scene, camera)
+      }
+
+      animate()
+
+      function updatePhysics() {
+        // world.step
+        world.step(1 / 60) //第一个参数是以固定步长更新物理世界参数（详情请看api）
+        scene.children.forEach(d => {
+          //遍历场景中的子对象，如果对象的isMesh属性为true，我们就将更新改对象的position和quaternion属性（他们对应的刚体数据存在对应的userData中）。
+          if (d.isMesh == true) {
+            // d.position.copy(d.userData.position)
+            // d.quaternion.copy(d.userData.quaternion)
+            const box = d.userData
+            if (box && box.position) {
+              d.position.set(box.position.x, box.position.y, box.position.z)
+              d.quaternion.set(box.quaternion.x, box.quaternion.y, box.quaternion.z, box.quaternion.w)
+            }
+          }
+        })
+      }
+    </script>
+  </body>
+</html>
