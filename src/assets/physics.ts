@@ -28,7 +28,7 @@ export default class PhysicsWorld {
 
     // this.world.quatNormalizeSkip = 0
     // this.world.quatNormalizeFast = false
-    this.world.gravity.set(0, 0, -9.8 * 100)
+    this.world.gravity.set(0, 0, -9.8 * 70)
     this.world.broadphase = new CANNON.NaiveBroadphase()
     this.world.solver.iterations = 5
 
@@ -60,9 +60,9 @@ export default class PhysicsWorld {
         angularDamping: 0.1,
       })
 
-      const x = 2
-      const y = 2
-      const z = 400 + 400 * speed
+      const x = 0
+      const y = 0
+      const z = 300 + 300 * speed
 
       bodyBox.velocity.set(x, y, z)
       bodyBox.angularVelocity.set(50 * Math.random() * randPM(), 50 * Math.random() * randPM(), 50 * Math.random() * randPM())

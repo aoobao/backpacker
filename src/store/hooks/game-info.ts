@@ -1,6 +1,6 @@
 import { GameState, PersonType, ThreeEnvironment } from '@/assets/types'
 import { reactive } from 'vue'
-import { defalutPerson } from '@/assets/setting'
+import { defalutPerson, resetMapList } from '@/assets/setting'
 import { randBetween } from '@/assets/index'
 import { SETTING } from '@/config'
 import PhysicsWorld from '@/assets/physics'
@@ -29,9 +29,9 @@ export function GameStateStore() {
       }
     })
 
+    resetMapList()
     gameState.currentPlayerId = randBetween(1, 4)
-    // gameState.currentPlayerId = 2
-
+    // gameState.currentPlayerId = 4
     env = undefined
   }
 
@@ -50,6 +50,17 @@ export function GameStateStore() {
     result.physicsWorld = p
   }
 
+  const getNextPlayer = () => {
+    // let current = (gameState.currentPlayerId || 0) + 1
+    // if (current > gameState.players.length) current = 1
+    let current = gameState.players.findIndex(t => t.id === gameState.currentPlayerId)
+    current++
+    if (current >= gameState.players.length) current = 0
+    const nextPlayer = gameState.players[current]
+
+    gameState.currentPlayerId = nextPlayer.id
+  }
+
   const result = {
     gameState,
     env,
@@ -61,6 +72,7 @@ export function GameStateStore() {
     setMap1,
     setMap2,
     setPhysicsWorld,
+    getNextPlayer,
   }
 
   return result

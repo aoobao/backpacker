@@ -1,5 +1,5 @@
 // 预加载文件
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { THREE } from './three/lib'
 
 export const enum FILE_TYPE {
@@ -109,7 +109,7 @@ function loadFile(file: FileItem) {
 }
 
 function loadGltf(file: FileItem) {
-  return new Promise((resolve, reject) => {
+  return new Promise<GLTF>((resolve, reject) => {
     const loader = new GLTFLoader()
 
     loader.load(

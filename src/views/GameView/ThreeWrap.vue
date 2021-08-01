@@ -39,13 +39,17 @@ export default defineComponent({
       env.control.mouseButtons.wheel = CameraControls.ACTION.ZOOM
       env.control.mouseButtons.right = CameraControls.ACTION.NONE
       env.control.dollySpeed = 0.2
-      // env.control.minPolarAngle = (0 * Math.PI) / 180
-      // env.control.maxPolarAngle = (70 * Math.PI) / 180
+      env.control.minPolarAngle = (0 * Math.PI) / 180
+      env.control.maxPolarAngle = (70 * Math.PI) / 180
 
       // env.control.minAzimuthAngle = (-50 * Math.PI) / 180
       // env.control.maxAzimuthAngle = (50 * Math.PI) / 180
 
       env.control.setLookAt(0.94201531069342, -248.2782624512877, 117.75268152579949, 0, 0, 0, true)
+
+      // env.control.rotateTo(0, env.control.polarAngle, false)
+
+      // console.log(env.control.azimuthAngle)
     }
 
     const initLight = () => {

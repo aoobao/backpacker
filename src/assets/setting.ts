@@ -1,7 +1,6 @@
-import { MapAddress, PersonType } from './types'
+import { MapAddress, PersonType, PointType } from './types'
 import { player1MapList, player2MapList, player3MapList, player4MapList } from './object.json'
-
-
+import Player from './object/Player'
 export const defalutPerson: Array<PersonType> = [
   createPerson(1, '王叔叔', false, '#ff441a', 0, '#d3d37c'),
   createPerson(2, '王妈妈', false, '#a07dbc', 8),
@@ -26,4 +25,39 @@ function createPerson(id: number, name: string, isAI: boolean, color: string, in
   return person
 }
 
-export const MapList: Array<MapAddress> = [...player1MapList, ...player2MapList, ...player3MapList, ...player4MapList]
+// 打工地图
+export const workMapList: Array<MapAddress> = [...player1MapList, ...player2MapList, ...player3MapList, ...player4MapList]
+
+// 旅游地图
+export const travelMapList: Array<MapAddress> = []
+
+export function getNextAddress(p: Player) {
+  const player = p.player
+  let mapIndex = player.map === 0 ? player.map0Index : player.map1Index
+  const mapList = player.map === 0 ? workMapList : travelMapList
+
+  mapIndex++
+  if (mapIndex === mapList.length) mapIndex = 0
+
+  const address = mapList[mapIndex]
+
+  return address
+}
+
+export function getCurrentAddress(p: Player) {
+  const player = p.player
+  const mapIndex = player.map === 0 ? player.map0Index : player.map1Index
+  const mapList = player.map === 0 ? workMapList : travelMapList
+
+  const address = mapList[mapIndex]
+
+  return address
+}
+
+export function resetMapList() {
+  workMapList.forEach(w => {
+    if (w.type === PointType.WORK) {
+      w.options.level = 0
+    }
+  })
+}

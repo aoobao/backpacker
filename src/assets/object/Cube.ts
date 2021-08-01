@@ -9,7 +9,7 @@ export interface CubeOptions {
 
 export default class Cube {
   instance: THREE.Mesh
-  size = 10
+  size = 14
   map1: THREE.Object3D
   constructor(opts: CubeOptions) {
     this.map1 = opts.map1
@@ -73,8 +73,8 @@ export default class Cube {
     return ~~maxName
   }
 
-  async show(physicsWorld: PhysicsWorld, speed: number) {
-    this.instance.position.set(0, 0, 5)
+  async show(physicsWorld: PhysicsWorld, speed: number, position: [number, number, number] = [0, 0, 5]) {
+    this.instance.position.set(...position)
 
     const x = (randBetween(-360, 360) * Math.PI) / 180
     const y = (randBetween(-360, 360) * Math.PI) / 180

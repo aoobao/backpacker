@@ -5,7 +5,7 @@ import { defineComponent, ref, onBeforeMount, onMounted } from 'vue'
 import { THREE } from '@/assets/three/lib'
 
 import { createAnimation } from '@/assets'
-import { MapList } from '@/assets/setting'
+import { workMapList } from '@/assets/setting'
 import { createType0Canvas, createWorkCanvas, createRewardCanvas } from '@/assets/canvas-background'
 import { MapAddress, PointType } from '@/assets/types'
 // import { useStore } from 'vuex'
@@ -20,7 +20,6 @@ export default defineComponent({
     const mapGeometry = new THREE.PlaneGeometry(254, 254)
     const mapMaterial = new THREE.MeshBasicMaterial({ color: 0x3f4470, side: THREE.DoubleSide })
     const map = new THREE.Mesh(mapGeometry, mapMaterial)
-
 
     // logo
     const logoGeometry = new THREE.PlaneGeometry(140, 82)
@@ -60,12 +59,15 @@ export default defineComponent({
     }
 
     // 地图棋盘格子
-    MapList.forEach(async m => {
+    workMapList.forEach(async m => {
       const geometry = new THREE.PlaneGeometry(m.width, m.height)
       const material = await createMaterial(m)
       // 发薪日
 
       const mesh = new THREE.Mesh(geometry, material)
+
+      mesh.name = `address-${m.index}`
+
       mesh.position.set(m.position[0], m.position[1], m.position[2])
 
       if (m.type !== PointType.START && m.options?.rotation) {
@@ -82,16 +84,22 @@ export default defineComponent({
         console.warn('three环境未获取')
       }
       map.position.z = -30
-      map.rotation.z = -Math.PI * 2
+      // map.rotation.z = -Math.PI * 2
       env?.scene.add(map)
 
-      const tween = createAnimation(map.rotation, { z: 0 }, 1000)
-
-      tween.onComplete(() => {
+      setTimeout(() => {
         store?.setMap1(map)
         isLoad.value = true
         emit('over')
-      })
+      }, 100)
+
+      // const tween = createAnimation(map.rotation, { z: 0 }, 1000)
+
+      // tween.onComplete(() => {
+      //   store?.setMap1(map)
+      //   isLoad.value = true
+      //   emit('over')
+      // })
     }
 
     onMounted(() => {
@@ -111,11 +119,24 @@ export default defineComponent({
         // const t = Math.sqrt(Math.pow(point.z, 2) + Math.pow(point.x, 2))
         // const polarVec = new THREE.Vector2(-point.y, t)
         // const polarRadian = polarVec.angle()
-        const azimuthVec = new THREE.Vector2(point.z, point.x)
-        let azimuthRadian = azimuthVec.angle() + Math.PI
+        const azimuthVec = new THREE.Vector2(point.y, point.x)
 
-        const num = Math.round((control.azimuthAngle - azimuthRadian) / (2 * Math.PI))
-        azimuthRadian = num * 2 * Math.PI + azimuthRadian
+        // console.log(azimuthVec.angle())
+        let redian = -azimuthVec.angle()
+        // console.log(redian, Math.PI, control.azimuthAngle)
+        // redian = -redian
+        // if (redian < Math.PI) {
+        // }
+        // if (redian < Math.PI) {
+        //   redian = Math.PI - redian
+        // } else {
+        //   redian += (90 * Math.PI) / 180
+        // }
+
+        // let azimuthRadian = redian
+
+        const num = Math.round((control.azimuthAngle - redian) / (2 * Math.PI))
+        const azimuthRadian = num * 2 * Math.PI + redian
 
         control.rotateTo(azimuthRadian, control.polarAngle, true)
 

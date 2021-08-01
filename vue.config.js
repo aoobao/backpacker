@@ -12,7 +12,7 @@ module.exports = {
         plugins: [
           new pxtovw({
             viewportWidth: 375,
-            exclude: /\\views\\/,
+            exclude: /\\src\\/,
           }),
           require('autoprefixer'),
         ],

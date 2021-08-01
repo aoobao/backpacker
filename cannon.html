@@ -41,9 +41,50 @@
 
       scene.add(gridHelper)
 
-      
+      const world = new CANNON.World()
+      world.gravity.set(0, 0, -9.8 * 50)
+      world.broadphase = new CANNON.NaiveBroadphase()
+      world.solver.iterations = 5
 
-     
+      // Create a plane
+      const groundShape = new CANNON.Plane()
+      const groundBody = new CANNON.Body({
+        mass: 0,
+        shape: groundShape,
+      })
+
+      groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), -Math.PI / 2)
+
+      world.addBody(groundBody)
+
+      createBox()
+      function createBox() {
+        var halfExtents = new CANNON.Vec3(15, 15, 15)
+        var boxShape = new CANNON.Box(halfExtents)
+
+        var boxBody = new CANNON.Body({
+          mass: 1,
+          linearDamping: 0.2,
+          angularDamping: 0.4,
+          material: new CANNON.Material({ friction: 0.5, restitution: 5 }),
+        })
+        boxBody.addShape(boxShape)
+
+        boxBody.angularVelocity.set(50 * Math.random() * randPM(), 50 * Math.random() * randPM(), 50 * Math.random() * randPM())
+
+        world.addBody(boxBody)
+
+        var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2)
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+
+        var boxMesh = new THREE.Mesh(boxGeometry, material)
+        boxMesh.userData = boxBody
+
+        scene.add(boxMesh)
+        world.addBody(boxBody)
+        boxBody.position.z = 300
+        boxMesh.position.z = 300
+      }
 
       const animate = function () {
         requestAnimationFrame(animate)
@@ -72,10 +113,6 @@
           }
         })
       }
-
-
-
-
 
       // const world = new CANNON.World()
       // world.gravity.set(0, 0, -9.8 * 50)
@@ -116,6 +153,9 @@
       //   boxBody.position.z = 200
       //   boxMesh.position.z = 200
       // }
+      function randPM() {
+        return Math.random() > 0.5 ? 1 : -1
+      }
     </script>
   </body>
 </html>

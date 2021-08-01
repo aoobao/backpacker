@@ -30,6 +30,7 @@ export interface Options {
   imageUrl?: string
   rewardIndex?: number // 机会类型 0 得到1分 1 可以选择和某个人交换位置 2 向所有人收取200元 3 在你的2张打工卡上各放1个经验标记
   reward?: Array<number> // 打工点奖励 [新手 一级 二级 老手]
+  level?: number // 当前奖励级别
 }
 
 // 0 发薪日 1 打工地址 2 机会 3 旅游城市
@@ -53,6 +54,7 @@ export interface MapAddress {
 
 export interface GameState {
   players: Array<PersonType>
+  // workMapList: Array<MapAddress>
   currentPlayerId?: number
   // env?: ThreeEnvironment
 }

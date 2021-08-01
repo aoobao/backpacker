@@ -70,7 +70,7 @@ export default {
   // background-color: red;
   background: url('~@/assets/image/bg.jpg') center center no-repeat;
   background-size: cover;
-
+  $text-shadow: orange 0.3vw 0.3vw 0.5vw,orange -0.3vw -0.3vw 0.5vw;
   .btns {
     position: absolute;
     width: 100%;
@@ -80,7 +80,7 @@ export default {
     // font-size: 12rem;
     .start {
       font-size: 14.93333vw;
-      text-shadow: orange 0.53333vw 0.53333vw 0.53333vw;
+      text-shadow: $text-shadow;
       letter-spacing: 2.66667vw;
       // color: orange;
     }
@@ -88,7 +88,7 @@ export default {
     .history {
       margin-top: 3rem;
       font-size: 9.6vw;
-      text-shadow: orange 0.53333vw 0.53333vw 0.53333vw;
+      text-shadow: $text-shadow;
     }
   }
 
