@@ -38,7 +38,8 @@ export default class Player {
     this.instance.scale.set(scaleNumber, scaleNumber, scaleNumber)
     this.instance.rotateX((90 * Math.PI) / 180)
     this.map1 = opts.map1
-    this.player = { ...opts.player }
+    // this.player = { ...opts.player }
+    this.player = opts.player
 
     bus.on(ACTION.RENDER, this.render)
 
@@ -94,6 +95,10 @@ export default class Player {
     })
   }
 
+  playWin() {
+    this.fadeToAction('Dance', 0.5)
+  }
+
   private initAction() {
     const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing']
     const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp']
@@ -132,7 +137,7 @@ export default class Player {
   }
 
   beginRun() {
-    this.fadeToAction('Running', 0.5)
+    this.fadeToAction('Running', 0.2)
   }
 
   stopAnimate() {
@@ -194,7 +199,7 @@ export default class Player {
 
   // 当前玩家是否在打工状态
   isWork() {
-    return this.player.map === 0
+    return this.player.map === 0 && !this.player.win
   }
 
   // 人物当前所在地点地点

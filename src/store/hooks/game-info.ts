@@ -26,12 +26,13 @@ export function GameStateStore() {
         map: 0,
         map0Index: p.index,
         points: 0,
+        win: 0,
       }
     })
 
     resetMapList()
-    gameState.currentPlayerId = randBetween(1, 4)
-    // gameState.currentPlayerId = 4
+    // gameState.currentPlayerId = randBetween(1, 4)
+    gameState.currentPlayerId = 1
     env = undefined
   }
 
@@ -50,15 +51,54 @@ export function GameStateStore() {
     result.physicsWorld = p
   }
 
-  const getNextPlayer = () => {
-    // let current = (gameState.currentPlayerId || 0) + 1
-    // if (current > gameState.players.length) current = 1
-    let current = gameState.players.findIndex(t => t.id === gameState.currentPlayerId)
-    current++
-    if (current >= gameState.players.length) current = 0
-    const nextPlayer = gameState.players[current]
+  // 获取下一个游戏玩家,如果返回false代表游戏结束
+  const toggleNextPlayer = () => {
+    const playerIndex = gameState.players.findIndex(t => t.id === gameState.currentPlayerId)
+    let current = playerIndex + 1 >= gameState.players.length ? 0 : playerIndex + 1
 
-    gameState.currentPlayerId = nextPlayer.id
+    while (playerIndex !== current) {
+      const nextPlayer = gameState.players[current]
+      if (nextPlayer.win === 0) {
+        gameState.currentPlayerId = nextPlayer.id
+        return true
+      }
+      current++
+      if (current >= gameState.players.length) current = 0
+    }
+
+    // 全部都胜利了.
+    gameState.currentPlayerId = 0
+    return false
+  }
+
+  const changeMoney = (playerId: number, money: number) => {
+    const player = gameState.players.find(t => t.id === playerId)
+    if (!player) throw new Error('未找到对应玩家:' + playerId)
+    player.money += money
+
+    return player.money
+  }
+
+  const addPoint = (playerId: number, num: number) => {
+    const player = findByPlayerId(playerId)
+    player.points += num
+    // 胜利逻辑
+    if (player.points >= SETTING.winPoints) {
+      player.win =
+        gameState.players.reduce((acc, cur) => {
+          return acc + cur.win ? 1 : 0
+        }, 0) + 1
+      return true
+    } else {
+      return false
+    }
+  }
+
+  const findByPlayerId = (playerId: number) => {
+    const player = gameState.players.find(t => t.id === playerId)
+    if (!player) throw new Error('未找到对应玩家:' + playerId)
+
+    return player
   }
 
   const result = {
@@ -72,7 +112,10 @@ export function GameStateStore() {
     setMap1,
     setMap2,
     setPhysicsWorld,
-    getNextPlayer,
+    toggleNextPlayer,
+    changeMoney, // 改变金额
+    addPoint, // 增加积分
+    findByPlayerId,
   }
 
   return result

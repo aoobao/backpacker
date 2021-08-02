@@ -1,6 +1,6 @@
 import TWEEN from '@tweenjs/tween.js'
-import { Toast } from 'vant'
-
+import { Toast, ToastPosition } from 'vant'
+import { THREE } from '@/assets/three/lib'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 
@@ -27,10 +27,11 @@ export function createAnimation(from: object, to: object, duration?: number, eas
   return tween
 }
 
-export function showMessage(msg: string, duration = 2000) {
+export function showMessage(msg: string, duration = 2000, position: ToastPosition = 'bottom') {
   Toast({
     message: msg,
     duration,
+    position,
   })
 }
 
@@ -85,4 +86,45 @@ export function getAngle(px: number, py: number, mx: number, my: number) {
     }
   }
   return angle
+}
+
+// const _pts: Array<THREE.Vector2> = []
+let starGeometry: THREE.ExtrudeGeometry
+let starMaterial: THREE.Material
+
+export function createStar() {
+  if (!starGeometry) {
+    const pts: Array<THREE.Vector2> = []
+    const numPts = 5
+    for (let i = 0; i < numPts * 2; i++) {
+      const l = i % 2 == 1 ? 10 : 20
+
+      const a = (i / numPts) * Math.PI
+
+      pts.push(new THREE.Vector2(Math.cos(a) * l, Math.sin(a) * l))
+    }
+
+    const shape = new THREE.Shape(pts)
+
+    const randomPoints = []
+
+    for (let i = 0; i < 10; i++) {
+      randomPoints.push(new THREE.Vector3((i - 4.5) * 50, THREE.MathUtils.randFloat(-50, 50), THREE.MathUtils.randFloat(-50, 50)))
+    }
+    const extrudeSettings = {
+      // steps: 2,
+      bevelEnabled: false,
+      depth: 0.5,
+    }
+
+    starGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+    starMaterial = new THREE.MeshLambertMaterial({
+      color: 0xff8000,
+      wireframe: false,
+    })
+  }
+
+  const star = new THREE.Mesh(starGeometry, starMaterial)
+
+  return star
 }

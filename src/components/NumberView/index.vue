@@ -57,7 +57,7 @@ export default defineComponent({
 .number-wrap {
   z-index: 1001;
   position: fixed;
-  top: 50vh;
+  top: 40vh;
   font-size: 24vw;
   text-shadow: orange 0.3vw 0.3vw 0.5vw, orange -0.3vw -0.3vw 0.5vw;
   width: 100%;

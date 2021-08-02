@@ -16,7 +16,7 @@
           <!-- <span class="led number">{{ player.points }}</span> -->
           <CountUp class="led number" :num="player.points" />
         </span>
-        <span class="status">状态: {{ statusText(player.map) }}</span>
+        <span class="status">状态: {{ statusText(player) }}</span>
 
         <!-- <span v-if="gameState.currentPlayerId === player.id" class="active-text">玩家进行中</span> -->
       </div>
@@ -43,8 +43,13 @@ export default defineComponent({
       }
     }
 
-    const statusText = (map: 0 | 1) => {
-      return map === 0 ? '打工' : '旅游'
+    const statusText = (player: PersonType) => {
+      // return map === 0 ? '打工' : '旅游'
+      if (player.win) {
+        return `第${player.win}名`
+      }
+
+      return player.map === 0 ? '打工' : '旅游'
     }
 
     return {

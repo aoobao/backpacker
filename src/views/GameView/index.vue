@@ -3,11 +3,12 @@
     <!-- 游戏页面 -->
     <ThreeWrap>
       <WorkMap @over="map1Init" ref="workMap" />
+      <HandUpDisplay v-if="map1Finish" />
+      <TouchView ref="touchRef" />
+      <NumberView ref="numberRef" />
+      <TextView ref="textRef" />
+      <RewardView ref="rewardRef" />
     </ThreeWrap>
-    <HandUpDisplay v-if="map1Finish" />
-    <TouchView ref="touchRef" />
-    <NumberView ref="numberRef" />
-    <TextView ref="textRef" />
   </div>
 </template>
 <script lang="ts">
@@ -28,15 +29,17 @@ import Cube from '@/assets/object/Cube'
 import TouchView from '@/components/TouchView/index.vue'
 import NumberView from '@/components/NumberView/index.vue'
 import TextView from '@/components/TextView.vue'
+import RewardView from '@/views/GameView/Reward/index.vue'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { MapAddress, PointType } from '@/assets/types'
 export default defineComponent({
-  components: { ThreeWrap, WorkMap, HandUpDisplay, TouchView, NumberView, TextView },
+  components: { ThreeWrap, WorkMap, HandUpDisplay, TouchView, NumberView, TextView, RewardView },
   setup() {
     const numberRef = ref<InstanceType<typeof NumberView>>()
     const workMap = ref<InstanceType<typeof WorkMap>>()
     const touchRef = ref<InstanceType<typeof TouchView>>()
     const textRef = ref<InstanceType<typeof TextView>>()
+    const rewardRef = ref<InstanceType<typeof RewardView>>()
     const store = useInjector(GameStateStore)
     const map1Finish = ref(false)
     const isLoad = ref(false)
@@ -116,9 +119,10 @@ export default defineComponent({
       // 关闭文字
       textRef.value?.close()
       // 等待骰子转动结束
-      await cube.show(store.physicsWorld!, speed)
+      // await cube.show(store.physicsWorld!, speed)
       // 获取骰子点数
-      const value = cube.getValue()
+      // const value = cube.getValue()
+      const value = 5
       // 显示骰子点数在屏幕上
       numberRef.value?.show(value)
       // 用户在屏幕上行动
@@ -138,10 +142,14 @@ export default defineComponent({
         await detailTravelEvent(player)
       }
 
-      // 继续下一个玩家
-      store.getNextPlayer()
-
-      gameLoop()
+      // 切换下一个玩家
+      const needNext = store.toggleNextPlayer()
+      if (needNext) {
+        gameLoop()
+      } else {
+        // TODO
+        // 游戏结束
+      }
     }
 
     const render = () => {
@@ -158,20 +166,29 @@ export default defineComponent({
       if (address.type === PointType.WORK) {
         if (player.player.id === address.options.playerId) {
           // 如果是自己的地盘,加熟练度
+
           await addLevel(address)
         } else {
-          const workPlayer = getPlayerById(address.options.playerId) // 当前地址所属玩家
+          // 当前地址所属玩家
+          const workPlayer = getPlayerById(address.options.playerId)
+          const level = address.options.level || 0
+          const money = address.options.reward![level]
           // 如果对方玩家在打工地图,给对方玩家加钱
           if (workPlayer.isWork()) {
-            // TODO
+            showMessage(`路过${address.options.name},玩家${workPlayer.player.name}打工赚得金钱:${money}`)
+
+            changeMoney(workPlayer, money)
           } else {
             // 给自己加钱
-            // TODO
+            showMessage(`路过${address.options.name}的玩家${workPlayer.player.name}正在旅游,${player.player.name}代替打工赚的金钱:${money}`)
+
+            changeMoney(player, money)
           }
         }
       } else if (address.type === PointType.REWARD) {
         // 机会
-        // TODO
+
+        await rewardRef.value?.show(player, address)
       }
 
       return true
@@ -182,20 +199,41 @@ export default defineComponent({
       // TODO
     }
 
+    // 金额变化
+    function changeMoney(player: Player, money: number) {
+      // player.player.money += money
+      const num = store!.changeMoney(player.player.id, money)
+      player.player.money = num
+    }
+
     // 增加熟练度
     async function addLevel(address: MapAddress) {
       let level = address.options.level || 0
       const player = players.find(t => t.player.id === address.options.playerId)
       if (level === 3) {
-        showMessage(`${player!.player.name}的${address.options.name}已经达到最高等级`, 5000)
+        showMessage(`${player!.player.name}的${address.options.name}已经达到最高等级`, 2000)
 
         return false
       } else {
         level++
         address.options.level = level
-        const cost = address.options.reward![level]
+        // const cost = address.options.reward![level]
 
-        showMessage(`${address.options.name}熟练度${level}级:${cost}元`, 5000)
+        showMessage(`路过自己打工点${address.options.name},熟练度增加!`, 2000)
+        // 增加星星动画
+        await workMap.value?.addStar(address)
+
+        // test
+
+        // level++
+        // address.options.level = level
+        // await workMap.value?.addStar(address)
+
+        // level++
+        // address.options.level = level
+        // await workMap.value?.addStar(address)
+
+        return true
       }
     }
 
@@ -207,6 +245,7 @@ export default defineComponent({
       touchRef,
       numberRef,
       textRef,
+      rewardRef,
     }
   },
 })

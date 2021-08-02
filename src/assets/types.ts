@@ -13,6 +13,7 @@ export interface PersonType {
   map0Index: number // 打工地图位置
   map1Index: number // 旅游地图位置
   points: number // 积分
+  win: number // 0:进行中,1 第1名 2:第2名 3:第3名 4:第4名
 }
 
 export interface RewardText {

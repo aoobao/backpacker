@@ -3,7 +3,8 @@ import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import { defineComponent, ref, onBeforeMount, onMounted } from 'vue'
 import { THREE } from '@/assets/three/lib'
-
+import { createStar } from '@/assets/index'
+import TWEEN from '@tweenjs/tween.js'
 import { createAnimation } from '@/assets'
 import { workMapList } from '@/assets/setting'
 import { createType0Canvas, createWorkCanvas, createRewardCanvas } from '@/assets/canvas-background'
@@ -112,6 +113,43 @@ export default defineComponent({
       env?.scene.remove(map)
     })
 
+    function addStar(address: MapAddress): Promise<boolean> {
+      const star = createStar()
+      const addressName = `address-${address.index}`
+      const position = address.position
+      const count = address.options.level || 1
+
+      const scale = {
+        x: 0.15,
+        y: 0.15,
+        // z: 0.15,
+      }
+      // star.scale.x = scale.x
+      // star.scale.y = scale.y
+
+      // star.scale.set(scale.x, scale.y, scale.z)
+      const x = address.width * 0.3 * count - address.width * 0.6
+      const y = address.height * 0.6
+      star.position.set(x, y, 0.2)
+      const addressMesh = map.children.find(t => t.name === addressName)
+
+      if (!addressMesh) throw new Error('未找到打工地点:' + addressName)
+
+      addressMesh.add(star)
+
+      // const tween =
+      // createAnimation(star.position, { z: 2 }, 2000, TWEEN.Easing.Linear.None)
+
+      const tween = createAnimation(star.scale, scale, 1500, TWEEN.Easing.Quartic.In)
+
+      return new Promise(resolve => {
+        // resolve(true)
+        tween.onComplete(() => {
+          resolve(true)
+        })
+      })
+    }
+
     function lookAtPosition(point: THREE.Vector3): void {
       const env = store?.env
       const control = env?.control
@@ -148,6 +186,7 @@ export default defineComponent({
     }
 
     return {
+      addStar,
       lookAtPosition,
       isLoad,
     }

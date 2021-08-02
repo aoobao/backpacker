@@ -56,16 +56,20 @@ export default class PhysicsWorld {
         position: new CANNON.Vec3(pos.x, pos.y, pos.z),
         shape: new CANNON.Box(halfExtents),
         quaternion: new CANNON.Quaternion(qua.x, qua.y, qua.z, qua.w),
-        linearDamping: 0.92,
-        angularDamping: 0.1,
+        linearDamping: 0.05,
+        angularDamping: 0.05,
       })
 
       const x = 0
       const y = 0
-      const z = 300 + 300 * speed
+      const z = 200 + 300 * speed
 
       bodyBox.velocity.set(x, y, z)
-      bodyBox.angularVelocity.set(50 * Math.random() * randPM(), 50 * Math.random() * randPM(), 50 * Math.random() * randPM())
+      bodyBox.angularVelocity.set(rendAngular(), rendAngular(), (50 + 50 * Math.random()) * randPM())
+
+      function rendAngular() {
+        return (10 + 10 * Math.random()) * randPM()
+      }
 
       const box: PhysicsBody = {
         type: 'cube',
@@ -122,7 +126,12 @@ export default class PhysicsWorld {
     quaternion.set(newQuaternion.x, newQuaternion.y, newQuaternion.z, newQuaternion.w)
     // isSame = false
     // }
-    return position.z <= size / 2 + 1 && t - box.timer > 3000
+    const velocity = box.bodyBox.velocity
+    const speed = Math.abs(velocity.x + velocity.y + velocity.z)
+
+    // console.log(speed)
+
+    return position.z <= size / 2 + 1 && speed < 0.5
   }
 
   destroy() {

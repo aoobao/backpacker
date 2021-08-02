@@ -5,6 +5,7 @@ export const bus = mitt()
 export const ACTION = {
   WINDOW_RESIZE: 'window resize', // 屏幕大小发生变化
   RENDER: 'render', // 屏幕渲染
+  WIN: 'win',
 }
 
 window.addEventListener('resize', () => {

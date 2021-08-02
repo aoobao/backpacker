@@ -21,6 +21,7 @@ function createPerson(id: number, name: string, isAI: boolean, color: string, in
     map0Index: index,
     map1Index: 0,
     points: 0,
+    win: 0,
   }
   return person
 }

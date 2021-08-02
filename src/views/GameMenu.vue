@@ -5,7 +5,10 @@
       <div class="history">继续征途</div>
     </div>
     <div class="loading-ui">
-      <div class="text">{{ loadingPercent === 1 ? '加载完成' : '资源加载中...' }}</div>
+      <div class="text flex-row">
+        <span>{{ loadingPercent === 1 ? '加载完成' : '资源加载中...' }}</span>
+        <span>by aoobao</span>
+      </div>
       <div class="load" :style="{ width: loadingPercent * 100 + '%' }"></div>
     </div>
     <UserCard @start="startGame" ref="startRef" />
@@ -70,7 +73,7 @@ export default {
   // background-color: red;
   background: url('~@/assets/image/bg.jpg') center center no-repeat;
   background-size: cover;
-  $text-shadow: orange 0.3vw 0.3vw 0.5vw,orange -0.3vw -0.3vw 0.5vw;
+  $text-shadow: orange 0.3vw 0.3vw 0.5vw, orange -0.3vw -0.3vw 0.5vw;
   .btns {
     position: absolute;
     width: 100%;
@@ -104,10 +107,12 @@ export default {
     align-items: center;
     .text {
       font-size: 20px;
-      color: #424242;
+      color: #fff;
       position: absolute;
       left: 0;
       top: -40px;
+      right: 0;
+      justify-content: space-between;
     }
     .load {
       height: 11px;
