@@ -12,7 +12,7 @@ animate__animated
         <div class="md-contents">
           <slot></slot>
         </div>
-        <div class="md-back" @click="close"></div>
+        <div class="md-back" @click="close" v-if="showClose"></div>
       </div>
     </transition>
 
@@ -46,6 +46,10 @@ export default defineComponent({
     title: {
       type: String,
       default: null,
+    },
+    showClose: {
+      type: Boolean,
+      default: true,
     },
   },
   setup(props, { emit }) {

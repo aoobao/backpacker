@@ -1,5 +1,5 @@
 import TWEEN from '@tweenjs/tween.js'
-import { Toast, ToastPosition } from 'vant'
+import { Toast, ToastPosition, Dialog } from 'vant'
 import { THREE } from '@/assets/three/lib'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
@@ -32,6 +32,21 @@ export function showMessage(msg: string, duration = 2000, position: ToastPositio
     message: msg,
     duration,
     position,
+  })
+}
+
+export function confirm(text: string, title = '提示') {
+  return new Promise(resolve => {
+    Dialog.confirm({
+      title: title,
+      message: text,
+    })
+      .then(() => {
+        resolve(true)
+      })
+      .catch(() => {
+        resolve(false)
+      })
   })
 }
 

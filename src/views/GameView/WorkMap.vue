@@ -6,7 +6,7 @@ import { THREE } from '@/assets/three/lib'
 import { createStar } from '@/assets/index'
 import TWEEN from '@tweenjs/tween.js'
 import { createAnimation } from '@/assets'
-import { workMapList } from '@/assets/setting'
+// import { workMapList } from '@/assets/setting'
 import { createType0Canvas, createWorkCanvas, createRewardCanvas } from '@/assets/canvas-background'
 import { MapAddress, PointType } from '@/assets/types'
 // import { useStore } from 'vuex'
@@ -16,6 +16,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const isLoad = ref(false)
     const store = useInjector(GameStateStore)
+    if (!store) throw new Error('未获取GameStateStore')
     const loader = new THREE.TextureLoader()
 
     const mapGeometry = new THREE.PlaneGeometry(254, 254)
@@ -60,7 +61,7 @@ export default defineComponent({
     }
 
     // 地图棋盘格子
-    workMapList.forEach(async m => {
+    store.gameState.workMapList.forEach(async m => {
       const geometry = new THREE.PlaneGeometry(m.width, m.height)
       const material = await createMaterial(m)
       // 发薪日

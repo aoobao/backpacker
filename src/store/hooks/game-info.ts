@@ -1,12 +1,15 @@
-import { GameState, PersonType, ThreeEnvironment } from '@/assets/types'
+import { GameState, MapAddress, PersonType, PointType, ThreeEnvironment } from '@/assets/types'
 import { reactive } from 'vue'
-import { defalutPerson, resetMapList } from '@/assets/setting'
+import { defalutPerson, workMapList, travelMapList } from '@/assets/setting'
 import { randBetween } from '@/assets/index'
 import { SETTING } from '@/config'
 import PhysicsWorld from '@/assets/physics'
+import Player from '@/assets/object/Player'
 function initGameState(): GameState {
   return {
     players: defalutPerson,
+    workMapList: [],
+    travelMapList: [],
   }
 }
 
@@ -30,9 +33,27 @@ export function GameStateStore() {
       }
     })
 
-    resetMapList()
-    // gameState.currentPlayerId = randBetween(1, 4)
-    gameState.currentPlayerId = 1
+    gameState.workMapList = workMapList.map(t => {
+      const w: MapAddress = {
+        ...t,
+        options: { ...t.options },
+      }
+      if (w.type === PointType.WORK) {
+        w.options.level = 0
+      }
+      return w
+    })
+
+    gameState.travelMapList = travelMapList.map(t => {
+      const w: MapAddress = {
+        ...t,
+        options: { ...t.options },
+      }
+      return w
+    })
+    // resetMapList()
+    gameState.currentPlayerId = randBetween(1, 4)
+    // gameState.currentPlayerId = 4
     env = undefined
   }
 
@@ -94,11 +115,30 @@ export function GameStateStore() {
     }
   }
 
-  const findByPlayerId = (playerId: number) => {
+  const findByPlayerId = (playerId: number): PersonType => {
     const player = gameState.players.find(t => t.id === playerId)
     if (!player) throw new Error('未找到对应玩家:' + playerId)
 
     return player
+  }
+
+  const getAddressByIndex = (index: number, map: 0 | 1 = 0) => {
+    const list = map === 0 ? gameState.workMapList : gameState.travelMapList
+    const address = list.find(t => t.index === index)
+
+    if (!address) throw new Error('未找到对应地图位置:' + index + ',map=' + map)
+
+    return address
+  }
+
+  const getCurrentAddress = (p: Player) => {
+    const player = p.player
+    const mapIndex = player.map === 0 ? player.map0Index : player.map1Index
+    const mapList = player.map === 0 ? gameState.workMapList : gameState.travelMapList
+
+    const address = mapList[mapIndex]
+
+    return address
   }
 
   const result = {
@@ -116,6 +156,8 @@ export function GameStateStore() {
     changeMoney, // 改变金额
     addPoint, // 增加积分
     findByPlayerId,
+    getCurrentAddress, // 获取用户当前所在地址
+    getAddressByIndex, // 根据index获取对应地图地址
   }
 
   return result

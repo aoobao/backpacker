@@ -30,7 +30,7 @@ export default class PhysicsWorld {
     // this.world.quatNormalizeFast = false
     this.world.gravity.set(0, 0, -9.8 * 70)
     this.world.broadphase = new CANNON.NaiveBroadphase()
-    this.world.solver.iterations = 5
+    this.world.solver.iterations = 10
 
     // 地面
     this.bodyGround = new CANNON.Body({

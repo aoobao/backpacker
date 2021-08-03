@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container flex-col">
     <div class="btns flex-col" v-if="loadingPercent === 1">
       <div class="start" @click="start">新的旅程</div>
       <div class="history">继续征途</div>
@@ -74,10 +74,12 @@ export default {
   background: url('~@/assets/image/bg.jpg') center center no-repeat;
   background-size: cover;
   $text-shadow: orange 0.3vw 0.3vw 0.5vw, orange -0.3vw -0.3vw 0.5vw;
+  justify-content: center;
   .btns {
-    position: absolute;
+    // position: absolute;
     width: 100%;
-    bottom: 15rem;
+    // bottom: 15rem;
+    // bottom: 50%;
     justify-content: center;
     color: #fff;
     // font-size: 12rem;

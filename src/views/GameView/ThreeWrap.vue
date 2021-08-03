@@ -26,18 +26,27 @@ export default defineComponent({
 
     let tick = 0
     let env: ThreeEnvironment
+    // const frustumSize = 300
 
     const initCameraAndControls = () => {
       env.camera = new THREE.PerspectiveCamera(60, env.width / env.height, 0.1, 1000)
-      env.camera.position.set(0, 0, 800)
+
+      // const aspect = window.innerWidth / window.innerHeight
+      // env.camera = new THREE.OrthographicCamera((frustumSize * aspect) / -2, (frustumSize * aspect) / 2, frustumSize / 2, frustumSize / -2, 1, 1000)
+
+      env.camera.position.set(0, 0, 200)
       env.camera.up.set(0, 0, 1)
 
       env.control = new CameraControls(env.camera!, env.renderer!.domElement)
 
       env.control.maxDistance = 700
 
-      env.control.mouseButtons.wheel = CameraControls.ACTION.ZOOM
-      env.control.mouseButtons.right = CameraControls.ACTION.NONE
+      // env.control.mouseButtons.wheel = CameraControls.ACTION.ZOOM
+      // env.control.mouseButtons.right = CameraControls.ACTION.NONE
+
+      // env.control.touches.two = CameraControls.ACTION.TOUCH_ZOOM
+      // env.control.touches.three = CameraControls.ACTION.TOUCH_ZOOM_TRUCK
+
       env.control.dollySpeed = 0.2
       env.control.minPolarAngle = (0 * Math.PI) / 180
       env.control.maxPolarAngle = (70 * Math.PI) / 180
@@ -45,7 +54,7 @@ export default defineComponent({
       // env.control.minAzimuthAngle = (-50 * Math.PI) / 180
       // env.control.maxAzimuthAngle = (50 * Math.PI) / 180
 
-      env.control.setLookAt(0.94201531069342, -248.2782624512877, 117.75268152579949, 0, 0, 0, true)
+      env.control.setLookAt(0, -245, 170, 0, 0, 0, true)
 
       // env.control.rotateTo(0, env.control.polarAngle, false)
 
@@ -79,6 +88,11 @@ export default defineComponent({
       if (!dom || !env) return
       env.width = dom.offsetWidth
       env.height = dom.offsetHeight
+
+      if (env.camera) {
+        // env.camera.aspect = env.width / env.height
+        env.camera.updateProjectionMatrix()
+      }
 
       env.renderer.setSize(env.width, env.height)
     }
@@ -130,6 +144,8 @@ export default defineComponent({
               const { x, y, z } = camera.position
               directionalLight.position.set(x, y, z)
             }
+
+            // console.log(`${camera.position.x},${camera.position.y},${camera.position.z}`)
           }
           env.renderer?.render(env.scene, camera)
         }

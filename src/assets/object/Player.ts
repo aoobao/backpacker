@@ -1,5 +1,5 @@
 import { MapAddress, PersonType } from '../types'
-import { workMapList, getNextAddress, getCurrentAddress } from '../setting'
+import { workMapList, getNextAddress } from '../setting'
 import { createAnimation, getAngle } from '@/assets/index'
 import TWEEN from '@tweenjs/tween.js'
 import { THREE } from '@/assets/three/lib'
@@ -172,6 +172,31 @@ export default class Player {
     })
   }
 
+  // 更换位置.
+  changeAddress(address: MapAddress) {
+    const targetPos = address.position
+    // 目标位置
+    const target = {
+      x: targetPos[0],
+      y: targetPos[1],
+      z: targetPos[2],
+    }
+
+    const tween = createAnimation(this.instance.position, target, 1000, TWEEN.Easing.Linear.None)
+    return new Promise<void>(resolve => {
+      tween.onComplete(() => {
+        if (this.player.map === 0) {
+          this.player.map0Index = address.index
+        } else {
+          this.player.map1Index = address.index
+        }
+
+        this.fixLookat(50)
+        resolve()
+      })
+    })
+  }
+
   // 修正人物的方向
   fixLookat(duration = 500): Promise<void> {
     return new Promise(resolve => {
@@ -200,12 +225,6 @@ export default class Player {
   // 当前玩家是否在打工状态
   isWork() {
     return this.player.map === 0 && !this.player.win
-  }
-
-  // 人物当前所在地点地点
-  getCurrentAddress(): MapAddress {
-    const address = getCurrentAddress(this)
-    return address
   }
 
   private render(e: any) {

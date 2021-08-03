@@ -55,7 +55,8 @@ export interface MapAddress {
 
 export interface GameState {
   players: Array<PersonType>
-  // workMapList: Array<MapAddress>
+  workMapList: Array<MapAddress>
+  travelMapList: Array<MapAddress>
   currentPlayerId?: number
   // env?: ThreeEnvironment
 }
@@ -69,6 +70,7 @@ export interface ThreeEnvironment {
   raycaster: THREE.Raycaster
   clock: THREE.Clock
   camera?: THREE.PerspectiveCamera
+  // camera?: THREE.OrthographicCamera
   control?: CameraControls
 }
 

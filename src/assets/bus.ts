@@ -6,6 +6,8 @@ export const ACTION = {
   WINDOW_RESIZE: 'window resize', // 屏幕大小发生变化
   RENDER: 'render', // 屏幕渲染
   WIN: 'win',
+  CHANGE_POSITION: 'change position', // 玩家更换位置 {player:PersonType,map:0|1,index:number}
+  ADD_LEVEL: 'add level', // 增加熟练度 { index }
 }
 
 window.addEventListener('resize', () => {
