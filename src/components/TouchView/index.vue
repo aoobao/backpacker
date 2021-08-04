@@ -97,8 +97,8 @@ export default defineComponent({
   position: fixed;
   right: 0;
   bottom: 30px;
-
   width: 40vw;
+  font-size: 48px;
   // height: 40%;
 
   // align-items: center;

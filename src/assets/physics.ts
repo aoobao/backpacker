@@ -25,12 +25,21 @@ export default class PhysicsWorld {
   constructor() {
     this.render = this.render.bind(this)
     this.world = new CANNON.World()
-
-    // this.world.quatNormalizeSkip = 0
-    // this.world.quatNormalizeFast = false
+    this.world.quatNormalizeSkip = 0
+    this.world.quatNormalizeFast = false
     this.world.gravity.set(0, 0, -9.8 * 70)
+
+    const solver = new CANNON.GSSolver()
+    this.world.defaultContactMaterial.contactEquationStiffness = 1e9
+    this.world.defaultContactMaterial.contactEquationRelaxation = 4
+    solver.iterations = 10
+    solver.tolerance = 0.1
+
+    this.world.solver = new CANNON.SplitSolver(solver)
+
     this.world.broadphase = new CANNON.NaiveBroadphase()
-    this.world.solver.iterations = 10
+
+    // this.world.solver.iterations = 10
 
     // 地面
     this.bodyGround = new CANNON.Body({
@@ -52,11 +61,11 @@ export default class PhysicsWorld {
       const size = cube.size
       const halfExtents = new CANNON.Vec3(size / 2, size / 2, size / 2)
       const bodyBox = new CANNON.Body({
-        mass: 1,
+        mass: 5,
         position: new CANNON.Vec3(pos.x, pos.y, pos.z),
         shape: new CANNON.Box(halfExtents),
         quaternion: new CANNON.Quaternion(qua.x, qua.y, qua.z, qua.w),
-        linearDamping: 0.05,
+        linearDamping: 0.01,
         angularDamping: 0.05,
       })
 
@@ -93,12 +102,13 @@ export default class PhysicsWorld {
       this.world.step(fixedTimeStep, delta, maxSubSteps)
       for (let i = this.bodyList.length - 1; i >= 0; i--) {
         const box = this.bodyList[i]
-        const instance = box.cube.instance
-        const pos = box.bodyBox.position
-        const quaternion = box.bodyBox.quaternion
+        // const instance = box.cube.instance
+        // const pos = box.bodyBox.position
+        // const quaternion = box.bodyBox.quaternion
 
         if (this.syncInstanceValue(box)) {
           this.bodyList.splice(i, 1)
+          this.world.remove(box.bodyBox)
           box.resolve()
         }
         // instance.position.set(pos.x, pos.y, pos.z)

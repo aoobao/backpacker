@@ -59,7 +59,7 @@ export default defineComponent({
 .text-wrap {
   z-index: 1002;
   position: fixed;
-  top: 20vh;
+  top: 25vh;
   font-size: 10vw;
   text-shadow: orange 0.3vw 0.3vw 0.5vw, orange -0.3vw -0.3vw 0.5vw;
   width: 100%;
