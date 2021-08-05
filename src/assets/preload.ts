@@ -25,11 +25,156 @@ export const FILE_LIST: Array<FileItem> = [
     path: require('@/assets/image/logo.png'),
     type: FILE_TYPE.IMAGE,
   },
-  // {
-  //   id: 'cube-material',
-  //   path: require('@/assets/image/material/cube-material.jpg'),
-  //   type: FILE_TYPE.IMAGE,
-  // },
+  {
+    id: 'travel-1',
+    path: require('@/assets/image/travel/1.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-2',
+    path: require('@/assets/image/travel/2.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-3',
+    path: require('@/assets/image/travel/3.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-4',
+    path: require('@/assets/image/travel/4.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-5',
+    path: require('@/assets/image/travel/5.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-6',
+    path: require('@/assets/image/travel/6.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-7',
+    path: require('@/assets/image/travel/7.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-8',
+    path: require('@/assets/image/travel/8.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-9',
+    path: require('@/assets/image/travel/9.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-10',
+    path: require('@/assets/image/travel/10.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-11',
+    path: require('@/assets/image/travel/11.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-12',
+    path: require('@/assets/image/travel/12.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-13',
+    path: require('@/assets/image/travel/13.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-14',
+    path: require('@/assets/image/travel/14.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-15',
+    path: require('@/assets/image/travel/15.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-17',
+    path: require('@/assets/image/travel/17.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-18',
+    path: require('@/assets/image/travel/18.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-19',
+    path: require('@/assets/image/travel/19.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-20',
+    path: require('@/assets/image/travel/20.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-21',
+    path: require('@/assets/image/travel/21.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-22',
+    path: require('@/assets/image/travel/22.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-23',
+    path: require('@/assets/image/travel/23.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-24',
+    path: require('@/assets/image/travel/24.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-25',
+    path: require('@/assets/image/travel/25.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-26',
+    path: require('@/assets/image/travel/26.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-27',
+    path: require('@/assets/image/travel/27.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-28',
+    path: require('@/assets/image/travel/28.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-29',
+    path: require('@/assets/image/travel/29.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-30',
+    path: require('@/assets/image/travel/30.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'travel-31',
+    path: require('@/assets/image/travel/31.jpg'),
+    type: FILE_TYPE.IMAGE,
+  },
 ]
 
 export function preLoadAllFile(onProgress?: (total: number, finishCount: number) => void) {
@@ -69,7 +214,7 @@ export function preLoadAllFile(onProgress?: (total: number, finishCount: number)
 
 export function getFile(id: string) {
   const file = FILE_LIST.find(t => t.id === id)
-  if (!file) throw new Error('id未找到')
+  if (!file) throw new Error('id未找到,id=' + id)
 
   if (!file.object) throw new Error('未预加载文件')
 

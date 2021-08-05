@@ -3,6 +3,7 @@ import { Toast, ToastPosition, Dialog } from 'vant'
 import { THREE } from '@/assets/three/lib'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
+import { RectType } from './types'
 
 export function numberToRgb(number: number) {
   const r = ~~(number / 0xff00)
@@ -142,4 +143,33 @@ export function createStar() {
   const star = new THREE.Mesh(starGeometry, starMaterial)
 
   return star
+}
+
+export function getCenterRect(width: number, height: number, maxWidth: number, maxHeight: number): RectType {
+  const aspect = width / height // 图片的宽高比
+  const maxAspect = maxWidth / maxHeight //容器的宽高比
+
+  const result: RectType = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  }
+
+  if (maxAspect > aspect) {
+    // 容器的宽度 比 图片的宽度 大
+    result.y = 0
+    result.height = maxHeight
+    result.width = maxHeight * aspect
+
+    result.x = (maxWidth - result.width) / 2
+  } else {
+    // 容器的高度 比图片的高度长
+    result.x = 0
+    result.width = maxWidth
+    result.height = maxWidth / aspect
+    result.y = (maxHeight - result.height) / 2
+  }
+
+  return result
 }

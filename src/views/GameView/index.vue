@@ -3,10 +3,11 @@
     <!-- 游戏页面 -->
     <ThreeWrap>
       <WorkMap @over="map1Init" ref="workMap" />
-      <HandUpDisplay v-if="map1Finish" />
+      <TravelMap @over="map2Init" ref="travelMap" />
+      <HandUpDisplay v-if="isFinish" />
       <TouchView ref="touchRef" />
       <NumberView ref="numberRef" />
-      <TextView ref="textRef" />
+      <!-- <TextView ref="textRef" /> -->
       <RewardView ref="rewardRef" />
     </ThreeWrap>
   </div>
@@ -18,6 +19,7 @@ import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import ThreeWrap from './ThreeWrap.vue'
 import WorkMap from './WorkMap.vue'
+import TravelMap from './TravelMap.vue'
 import HandUpDisplay from './HandUpDisplay.vue'
 import { delay, showMessage, confirm } from '@/assets/index'
 import { FileItem, getFileById } from '@/assets/preload'
@@ -29,27 +31,26 @@ import { ACTION, bus } from '@/assets/bus'
 import Cube from '@/assets/object/Cube'
 import TouchView from '@/components/TouchView/index.vue'
 import NumberView from '@/components/NumberView/index.vue'
-import TextView from '@/components/TextView.vue'
+// import TextView from '@/components/TextView.vue'
 import RewardView from '@/views/GameView/Reward/index.vue'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { MapAddress, PersonType, PointType } from '@/assets/types'
 // import { Dialog } from 'vant'
 export default defineComponent({
-  components: { ThreeWrap, WorkMap, HandUpDisplay, TouchView, NumberView, TextView, RewardView },
+  components: { ThreeWrap, WorkMap, TravelMap, HandUpDisplay, TouchView, NumberView, RewardView },
+  // components: { HandUpDisplay },
   setup() {
     const numberRef = ref<InstanceType<typeof NumberView>>()
     const workMap = ref<InstanceType<typeof WorkMap>>()
+    const travelMap = ref<InstanceType<typeof TravelMap>>()
     const touchRef = ref<InstanceType<typeof TouchView>>()
-    const textRef = ref<InstanceType<typeof TextView>>()
+    // const textRef = ref<InstanceType<typeof TextView>>()
     const rewardRef = ref<InstanceType<typeof RewardView>>()
     const store = useInjector(GameStateStore)
     if (!store) throw new Error('未获取GameStateStore')
     const map1Finish = ref(false)
     const isLoad = ref(false)
-    const map2Finish = ref(true)
-
-    // 当前活动地图
-    const currentMap = ref<0 | 1>(0)
+    const map2Finish = ref(false)
 
     let playerFile: FileItem
     let players: Array<Player>
@@ -65,12 +66,22 @@ export default defineComponent({
     const map1Init = () => {
       map1Finish.value = true
     }
+    const map2Init = () => {
+      map2Finish.value = true
+    }
     watch(
       () => isFinish.value,
       val => {
         if (val) {
           init()
         }
+      },
+    )
+
+    watch(
+      () => store.gameState.activeMap,
+      val => {
+        toggleMap(val)
       },
     )
 
@@ -81,14 +92,17 @@ export default defineComponent({
         return new Player({
           player: p,
           gltf: gltf,
-          map1: store.map1!,
+          map0: store.map1!,
+          map1: store.map2!,
         })
       })
       bus.on(ACTION.RENDER, render)
-
       bus.on(ACTION.CHANGE_POSITION, playerChangePosition)
-
       bus.on(ACTION.ADD_LEVEL, addLevelByAddressIndex)
+
+      const player = store.findByPlayerId(store.gameState.currentPlayerId!)
+
+      toggleMap(player.map)
 
       // 开场动画
       delay(1).then(() => {
@@ -115,11 +129,15 @@ export default defineComponent({
 
       const player = getPlayerById(store.gameState.currentPlayerId!)
 
-      textRef.value?.show(`${player.player.name}进行中`)
+      // textRef.value?.show(`${player.player.name}进行中`)
+
+      // console.log(player.player.map, store.gameState.activeMap)
 
       // 切换地图
-      if (player.player.map !== currentMap.value) {
-        await toggleMap(player.player.map)
+      if (player.player.map !== store.gameState.activeMap) {
+        // await toggleMap(player.player.map)
+        store.gameState.activeMap = player.player.map
+        await delay(2)
       }
 
       // 聚焦当前玩家
@@ -134,7 +152,7 @@ export default defineComponent({
       }
 
       // 关闭文字
-      textRef.value?.close()
+      // textRef.value?.close()
       // 等待骰子转动结束
       await cube.show(store.physicsWorld!, speed)
       // 获取骰子点数
@@ -246,7 +264,14 @@ export default defineComponent({
 
     // 切换地图
     const toggleMap = async (map: 0 | 1) => {
-      // TODO
+      const env = store.env
+      if (!env) throw new Error('three环境未获取')
+
+      if (map === 0) {
+        env.control!.setLookAt(0, -245, 170, 0, 0, 0, true)
+      } else {
+        env.control!.setLookAt(0, -245, -830, 0, 0, -1000, true)
+      }
     }
 
     // 处理旅游状态下的业务逻辑
@@ -290,12 +315,15 @@ export default defineComponent({
 
     return {
       map1Init,
+      map2Init,
       gameState: store?.gameState,
-      map1Finish,
+      // map1Finish,
+      isFinish,
       workMap,
+      travelMap,
       touchRef,
       numberRef,
-      textRef,
+      // textRef,
       rewardRef,
     }
   },

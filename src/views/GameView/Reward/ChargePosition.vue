@@ -117,17 +117,27 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .charge-position-wrap {
-  width: 50vw;
+  // width: 50vw;
   // height: 30rem;
+  width: 350px;
 
-  padding-top: 3rem;
-  padding-bottom: 3rem;
+  // padding-top: 3rem;
+  // padding-bottom: 3rem;
+  padding-top: 16px;
+  padding-bottom: 16px;
   position: absolute;
-  left: 25vw;
-  top: 20vh;
+  top: 25vh;
+  left: 50%;
+  margin-left: -175px;
+  // left: 25vw;
+  // top: 20vh;
   background-image: url('~@/components/Modal/bg.jpg');
   background-size: 100% 100%;
-  opacity: 0.8;
+  opacity: 0.9;
+  font-size: 12px;
+  .title {
+    font-size: 18px;
+  }
 
   // .bg {
   //   position: absolute;
@@ -138,32 +148,41 @@ export default defineComponent({
   // }
 
   .body {
-    margin-top: 2rem;
+    // margin-top: 2rem;
+    margin-top: 16px;
     justify-content: space-around;
-    font-size: 2rem;
+    font-size: 12px;
 
     .card {
       // padding: 20px 30px;
       align-items: flex-start;
-      padding-left: 20px;
-      padding-top: 30px;
-      padding-bottom: 30px;
-      width: 25%;
+      // padding-left: 20px;
+      // padding-top: 8px;
+      // padding-bottom: 8px;
+      // width: 25%;
+      width: 100px;
+      height: 50px;
       border: 1px solid #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
 
       span {
-        font-size: 1rem;
+        font-size: 12px;
+        margin-left: 5px;
         margin-top: 5px;
         margin-bottom: 5px;
       }
     }
   }
   .btns {
-    margin-top: 3rem;
+    margin-top: 24px;
   }
   .btn {
     // background-color: #1989fa;
-    padding: 0.5rem 1rem;
+    // padding: 0.5rem 1rem;
+
+    font-size: 24px;
     // color: red;
   }
 }

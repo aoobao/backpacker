@@ -1,7 +1,7 @@
 <script lang="ts">
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
-import { defineComponent, ref, onBeforeMount, onMounted } from 'vue'
+import { defineComponent, ref, onBeforeMount, onMounted, watch } from 'vue'
 import { THREE } from '@/assets/three/lib'
 import { createStar } from '@/assets/index'
 import TWEEN from '@tweenjs/tween.js'
@@ -22,6 +22,7 @@ export default defineComponent({
     const mapGeometry = new THREE.PlaneGeometry(254, 254)
     const mapMaterial = new THREE.MeshBasicMaterial({ color: 0x3f4470, side: THREE.DoubleSide })
     const map = new THREE.Mesh(mapGeometry, mapMaterial)
+    if (store.gameState.activeMap === 1) map.visible = false
 
     // logo
     const logoGeometry = new THREE.PlaneGeometry(140, 82)
@@ -32,6 +33,17 @@ export default defineComponent({
     const logo = new THREE.Mesh(logoGeometry, logoMaterial)
     logo.position.z = 0.5
     map.add(logo)
+
+    watch(
+      () => store.gameState.activeMap,
+      val => {
+        if (val === 0) {
+          map.visible = true
+        } else {
+          map.visible = false
+        }
+      },
+    )
 
     const createMaterial = async (m: MapAddress): Promise<THREE.Material> => {
       const player = store?.gameState.players.find(t => t.id === m.options.playerId)
@@ -68,7 +80,7 @@ export default defineComponent({
 
       const mesh = new THREE.Mesh(geometry, material)
 
-      mesh.name = `address-${m.index}`
+      mesh.name = `work-${m.index}`
 
       mesh.position.set(m.position[0], m.position[1], m.position[2])
 
@@ -80,14 +92,15 @@ export default defineComponent({
     })
 
     const init = () => {
-      const env = store?.env
+      const env = store.env
 
       if (!env) {
-        console.warn('three环境未获取')
+        // console.warn('three环境未获取')
+        throw new Error('three环境未获取')
       }
       map.position.z = -30
       // map.rotation.z = -Math.PI * 2
-      env?.scene.add(map)
+      env.scene.add(map)
 
       setTimeout(() => {
         store?.setMap1(map)
@@ -112,12 +125,14 @@ export default defineComponent({
       // const env = store?.gameState.env
       const env = store?.env
       env?.scene.remove(map)
+      mapGeometry.dispose()
+      mapMaterial.dispose()
     })
 
     function addStar(address: MapAddress): Promise<boolean> {
       const star = createStar()
-      const addressName = `address-${address.index}`
-      const position = address.position
+      const addressName = `work-${address.index}`
+      // const position = address.position
       const count = address.options.level || 1
 
       const scale = {

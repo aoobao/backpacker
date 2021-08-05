@@ -79,7 +79,7 @@ export default defineComponent({
 .wrap {
   width: 100%;
   height: 100%;
-  font-size: 1.8rem;
+  font-size: 18px;
 
   .person-item {
     height: 20%;
@@ -110,10 +110,11 @@ export default defineComponent({
   .button {
     color: #fff;
     text-shadow: orange 0.53333vw 0.53333vw 0.53333vw;
-    letter-spacing: 2.66667vw;
+    letter-spacing: 10px;
     // color: orangered;
     // margin-top: 16px;
-    font-size: 2.4rem;
+    // font-size: 2.4rem;
+    font-size: 24px;
     // letter-spacing: 10px;
     font-weight: bold;
     // border: 1px solid orangered;

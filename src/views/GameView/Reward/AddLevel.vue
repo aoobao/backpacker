@@ -113,27 +113,31 @@ export default defineComponent({
 .remark {
   margin-top: 16px;
 }
+.wrap {
+  font-size: 14px;
+}
 .body {
-  margin: 32px auto 0;
-  width: 35rem;
+  margin: 8px auto 0;
+  // width: 35rem;
+  width: 350px;
   flex-wrap: wrap;
   justify-content: space-around;
 
   align-items: center;
   .card {
     margin-top: 16px;
-    width: 10rem;
-    height: 17rem;
+    width: 100px;
+    height: 160px;
     border: 1px solid #fff;
-    font-size: 1.8rem;
+    font-size: 18px;
     position: relative;
     .header {
-      margin-top: 0.3rem;
+      margin-top: 4px;
       flex-shrink: 0;
     }
     .image {
       flex-grow: 1;
-      margin-top: 1rem;
+      margin-top: 8px;
       background-size: 100% 100%;
 
       // background-color: red;
@@ -160,6 +164,7 @@ export default defineComponent({
   }
 }
 .btn {
-  margin-top: 32px;
+  margin-top: 16px;
+  font-size: 24px;
 }
 </style>

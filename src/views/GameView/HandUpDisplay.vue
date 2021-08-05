@@ -1,7 +1,7 @@
 <template>
   <div class="ui pointer-none" v-if="gameState">
     <div class="player-status">
-      <div class="title">玩家信息</div>
+      <!-- <div class="title">玩家信息</div> -->
       <div class="player-item flex-row" :class="{ active: gameState.currentPlayerId === player.id }" v-for="player in gameState.players" :key="player.id" :style="getStyle(player)">
         <!-- <div class="active-status" v-if="gameState.currentPlayerId === player.id">→</div> -->
         <span class="name text">姓名: {{ player.name }}</span>
@@ -19,6 +19,11 @@
         <!-- <span v-if="gameState.currentPlayerId === player.id" class="active-text">玩家进行中</span> -->
       </div>
     </div>
+
+    <div class="toggle pointer">
+      <div class="work card" v-if="gameState.activeMap === 0" @click="gameState.activeMap = 1"></div>
+      <div class="travel card" v-if="gameState.activeMap === 1" @click="gameState.activeMap = 0"></div>
+    </div>
   </div>
 </template>
 
@@ -33,7 +38,8 @@ export default defineComponent({
   components: { CountUp },
   setup() {
     const store = useInjector(GameStateStore)
-    const gameState = store?.gameState
+    if (!store) throw new Error('未获取GameStateStore')
+    const gameState = store.gameState
 
     const getStyle = (player: PersonType) => {
       return {
@@ -105,6 +111,67 @@ export default defineComponent({
         animation: move 1s infinite;
       }
     }
+  }
+
+  .toggle {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    // transform-style: preserve-3d;
+    // perspective: 800px;
+    // $unit: 50px;
+    // width: 15px;
+    // height: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .card {
+      width: 30px;
+      height: 30px;
+
+      background-size: 100% 100%;
+    }
+    .work {
+      background-image: url('~@/assets/image/work.png');
+    }
+
+    .travel {
+      background-image: url('~@/assets/image/travel.png');
+    }
+
+    &.map1 {
+      .work {
+        transform: translate(-10px, 0) translateZ(2px);
+      }
+
+      .travel {
+        transform: translateZ(200px);
+      }
+    }
+
+    // .travel {
+    //   background-image: url('~@/assets/image/travel.png');
+    //   transform-origin: center;
+    // }
+
+    // &.map0 {
+    //   .work {
+    //     transform: translate(-15px, 0px) translateZ(400px);
+    //   }
+    //   .travel {
+    //     transform: translate(15px, -2px) translateZ(30px);
+    //   }
+    // }
+
+    // &.map1 {
+    //   .work {
+    //     transform: translateZ(30px);
+    //   }
+
+    //   .travel {
+    //     transform: translateZ(400px);
+    //   }
+    // }
   }
 
   .number {

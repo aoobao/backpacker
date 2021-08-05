@@ -1,5 +1,5 @@
 import { MapAddress, PersonType } from '../types'
-import { workMapList, getNextAddress } from '../setting'
+import { workMapList, travelMapList, getNextAddress } from '../setting'
 import { createAnimation, getAngle } from '@/assets/index'
 import TWEEN from '@tweenjs/tween.js'
 import { THREE } from '@/assets/three/lib'
@@ -9,6 +9,7 @@ export interface PlayerOptions {
   player: PersonType
   gltf: GLTF
   map1: THREE.Object3D
+  map0: THREE.Object3D
 }
 
 export interface ActionType {
@@ -19,6 +20,7 @@ export interface ActionType {
 export default class Player {
   instance: THREE.Object3D
   player: PersonType
+  map0: THREE.Object3D
   map1: THREE.Object3D
   mixer: THREE.AnimationMixer
   actions: Array<ActionType> = []
@@ -37,6 +39,7 @@ export default class Player {
     const scaleNumber = 8
     this.instance.scale.set(scaleNumber, scaleNumber, scaleNumber)
     this.instance.rotateX((90 * Math.PI) / 180)
+    this.map0 = opts.map0
     this.map1 = opts.map1
     // this.player = { ...opts.player }
     this.player = opts.player
@@ -71,11 +74,12 @@ export default class Player {
 
   private init(): Promise<void> {
     return new Promise(resolve => {
-      // FIX:
-      const map = this.map1
+      const map = this.player.map === 0 ? this.map0 : this.map1
+      const mapList = this.player.map === 0 ? workMapList : travelMapList
+      const index = this.player.map === 0 ? this.player.map0Index : this.player.map1Index
       if (!map) throw new Error('未找到地图对象')
       // const mapAddress = MapList.find(t=> t.index === this.player.index)
-      const mapAddress = workMapList[this.player.index]
+      const mapAddress = mapList[index]
 
       this.instance.position.set(...mapAddress.position)
 

@@ -8,6 +8,7 @@ import Player from '@/assets/object/Player'
 function initGameState(): GameState {
   return {
     players: defalutPerson,
+    activeMap: 0,
     workMapList: [],
     travelMapList: [],
   }
@@ -26,7 +27,7 @@ export function GameStateStore() {
       return {
         ...p,
         money: SETTING.initMoney,
-        map: 0,
+        map: 0, // TEST
         map0Index: p.index,
         points: 0,
         win: 0,

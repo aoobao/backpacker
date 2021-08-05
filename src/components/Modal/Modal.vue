@@ -33,11 +33,11 @@ export default defineComponent({
   props: {
     width: {
       type: String,
-      default: '85vw',
+      default: '350px',
     },
     height: {
       type: String,
-      default: '70vh',
+      default: '500px',
     },
     visible: {
       type: Boolean,
@@ -114,10 +114,14 @@ export default defineComponent({
 
   .md-back {
     position: absolute;
-    right: -1rem;
-    top: -7rem;
-    width: 8rem;
-    height: 8rem;
+    // right: -1rem;
+    right: -10px;
+    // top: -7rem;
+    top: -40px;
+    // width: 8rem;
+    // height: 8rem;
+    width: 30px;
+    height: 30px;
     background-image: url('./back.png');
     background-size: 100% 100%;
   }

@@ -41,20 +41,20 @@ export default defineComponent({
 
       env.control.maxDistance = 700
 
-      // env.control.mouseButtons.wheel = CameraControls.ACTION.ZOOM
-      // env.control.mouseButtons.right = CameraControls.ACTION.NONE
+      env.control.mouseButtons.wheel = CameraControls.ACTION.ZOOM
+      env.control.mouseButtons.right = CameraControls.ACTION.NONE
 
-      // env.control.touches.two = CameraControls.ACTION.TOUCH_ZOOM
-      // env.control.touches.three = CameraControls.ACTION.TOUCH_ZOOM_TRUCK
+      env.control.touches.two = CameraControls.ACTION.TOUCH_ZOOM
+      env.control.touches.three = CameraControls.ACTION.TOUCH_ZOOM_TRUCK
 
-      env.control.dollySpeed = 0.2
+      env.control.dollySpeed = 0.4
       env.control.minPolarAngle = (0 * Math.PI) / 180
       env.control.maxPolarAngle = (70 * Math.PI) / 180
 
       // env.control.minAzimuthAngle = (-50 * Math.PI) / 180
       // env.control.maxAzimuthAngle = (50 * Math.PI) / 180
 
-      env.control.setLookAt(0, -245, 170, 0, 0, 0, true)
+      // env.control.setLookAt(0, -245, 170, 0, 0, 0, true)
 
       // env.control.rotateTo(0, env.control.polarAngle, false)
 

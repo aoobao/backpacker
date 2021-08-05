@@ -17,12 +17,6 @@ export default class Cube {
     const geometry = new THREE.BoxGeometry(this.size, this.size, this.size)
 
     const materials = createCubeMaterials()
-    // const texture = new THREE.TextureLoader().load(require('@/assets/image/material/cube-material.jpg'))
-
-    // const material = new THREE.MeshLambertMaterial({
-    //   color: 0xffffff,
-    //   map: texture,
-    // })
 
     this.instance = new THREE.Mesh(geometry, materials)
     this.instance.position.z = 5

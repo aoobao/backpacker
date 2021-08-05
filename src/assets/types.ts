@@ -32,6 +32,8 @@ export interface Options {
   rewardIndex?: number // 机会类型 0 得到1分 1 可以选择和某个人交换位置 2 向所有人收取200元 3 在你的2张打工卡上各放1个经验标记
   reward?: Array<number> // 打工点奖励 [新手 一级 二级 老手]
   level?: number // 当前奖励级别
+  texts?: Array<string> // ['亚洲区','印度','泰姬','玛哈陵']
+  color?: string
 }
 
 // 0 发薪日 1 打工地址 2 机会 3 旅游城市
@@ -41,6 +43,7 @@ export enum PointType {
   WORK = 1,
   REWARD = 2,
   CITY = 3,
+  BIG_CITY = 4, // 正方形方块比较大的旅游景点样式
 }
 
 export interface MapAddress {
@@ -55,6 +58,7 @@ export interface MapAddress {
 
 export interface GameState {
   players: Array<PersonType>
+  activeMap: 0 | 1 //当前活动地图 0: 打工地图 1: 旅游地图
   workMapList: Array<MapAddress>
   travelMapList: Array<MapAddress>
   currentPlayerId?: number
@@ -74,6 +78,13 @@ export interface ThreeEnvironment {
   control?: CameraControls
 }
 
+export interface RectType {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 // 初始化three环境基本参数.
 export function createThreeEnvironment(dom: HTMLElement, rendererParameters: THREE.WebGLRendererParameters = { antialias: true, alpha: true }) {
   const env: ThreeEnvironment = {
@@ -85,7 +96,7 @@ export function createThreeEnvironment(dom: HTMLElement, rendererParameters: THR
     clock: new THREE.Clock(),
     renderer: new THREE.WebGLRenderer(rendererParameters),
   }
-
+  env.renderer.setPixelRatio(window.devicePixelRatio)
   env.renderer.setSize(dom.offsetWidth, dom.offsetHeight)
   dom.appendChild(env.renderer.domElement)
 

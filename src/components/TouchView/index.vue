@@ -96,7 +96,7 @@ export default defineComponent({
   z-index: 1000;
   position: fixed;
   right: 0;
-  bottom: 30px;
+  bottom: 50px;
   width: 40vw;
   font-size: 48px;
   // height: 40%;
