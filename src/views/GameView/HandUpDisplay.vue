@@ -1,7 +1,7 @@
 <template>
   <div class="ui pointer-none" v-if="gameState">
     <div class="player-status">
-      <!-- <div class="title">玩家信息</div> -->
+      <div class="title" v-if="currentPlayer">{{ currentPlayer.name }}进行中...</div>
       <div class="player-item flex-row" :class="{ active: gameState.currentPlayerId === player.id }" v-for="player in gameState.players" :key="player.id" :style="getStyle(player)">
         <!-- <div class="active-status" v-if="gameState.currentPlayerId === player.id">→</div> -->
         <span class="name text">姓名: {{ player.name }}</span>
@@ -20,31 +20,81 @@
       </div>
     </div>
 
+    <div class="text-message-box pointer" ref="message">
+      <div class="scroll" ref="scroll">
+        <div class="message" v-for="(message, index) in messageList" :key="index">
+          {{ message }}
+        </div>
+      </div>
+    </div>
+
     <div class="toggle pointer">
-      <div class="work card" v-if="gameState.activeMap === 0" @click="gameState.activeMap = 1"></div>
-      <div class="travel card" v-if="gameState.activeMap === 1" @click="gameState.activeMap = 0"></div>
+      <div class="work card" v-if="gameState.activeMap === 0" @click="changeActiveMap(1)"></div>
+      <div class="travel card" v-if="gameState.activeMap === 1" @click="changeActiveMap(0)"></div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent, nextTick, onBeforeUnmount, ref } from 'vue'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import { PersonType } from '@/assets/types'
 import CountUp from '@/components/CountUp.vue'
+import { showMessage } from '@/assets'
+import { bus, ACTION } from '@/assets/bus'
 
 export default defineComponent({
   components: { CountUp },
-  setup() {
+  props: {
+    enabled: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  setup(props) {
     const store = useInjector(GameStateStore)
     if (!store) throw new Error('未获取GameStateStore')
+    const message = ref<HTMLElement>()
+    const scroll = ref<HTMLElement>()
+
+    const messageList = ref<Array<string>>([])
+
     const gameState = store.gameState
 
     const getStyle = (player: PersonType) => {
       return {
         color: player.color,
       }
+    }
+
+    const scrollTopValue = () => {
+      const messageHeight = message.value!.offsetHeight
+      const scrollHeight = scroll.value!.offsetHeight
+      const top = scrollHeight - messageHeight + 10
+
+      return Math.max(top, 0)
+    }
+
+    const scrollToBottom = () => {
+      nextTick(() => {
+        const value = scrollTopValue()
+
+        if (value > 0) {
+          message.value!.scrollTop = value
+        }
+      })
+    }
+
+    const appendText = (data: any) => {
+      const message = data.message as string
+      const player = data.player as PersonType
+
+      const text = `【${player.name}】${message}`
+
+      messageList.value.push(text)
+
+      scrollToBottom()
     }
 
     const statusText = (player: PersonType) => {
@@ -56,10 +106,36 @@ export default defineComponent({
       return player.map === 0 ? '打工' : '旅游'
     }
 
+    const currentPlayer = computed(() => {
+      const currentId = store.gameState.currentPlayerId
+      if (!currentId) return null
+      const player = store.gameState.players.find(t => t.id === currentId)
+      return player || null
+    })
+
+    const changeActiveMap = (val: 0 | 1) => {
+      if (!props.enabled) {
+        showMessage('当前阶段不能切换地图哦')
+      } else {
+        store.gameState.activeMap = val
+      }
+    }
+
+    bus.on(ACTION.APPEND_MESSAGE, appendText)
+
+    onBeforeUnmount(() => {
+      bus.off(ACTION.APPEND_MESSAGE, appendText)
+    })
+
     return {
       gameState,
+      currentPlayer,
       getStyle,
       statusText,
+      changeActiveMap,
+      message,
+      scroll,
+      messageList,
     }
   },
 })
@@ -113,10 +189,30 @@ export default defineComponent({
     }
   }
 
+  .text-message-box {
+    width: 30%;
+    height: 30%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: rgba($color: #777, $alpha: 0.5);
+    border-top-right-radius: 4px;
+    overflow: auto;
+    padding-bottom: 4px;
+
+    .message {
+      text-align: left;
+      color: #fff;
+      font-size: 12px;
+      margin-left: 4px;
+      margin-top: 4px;
+    }
+  }
+
   .toggle {
     position: absolute;
     right: 10px;
-    bottom: 10px;
+    top: 10px;
     // transform-style: preserve-3d;
     // perspective: 800px;
     // $unit: 50px;
@@ -126,10 +222,11 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     .card {
-      width: 30px;
-      height: 30px;
-
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
       background-size: 100% 100%;
+      // animation: rotation 3s infinite linear;
     }
     .work {
       background-image: url('~@/assets/image/work.png');
@@ -138,44 +235,19 @@ export default defineComponent({
     .travel {
       background-image: url('~@/assets/image/travel.png');
     }
-
-    &.map1 {
-      .work {
-        transform: translate(-10px, 0) translateZ(2px);
-      }
-
-      .travel {
-        transform: translateZ(200px);
-      }
-    }
-
-    // .travel {
-    //   background-image: url('~@/assets/image/travel.png');
-    //   transform-origin: center;
-    // }
-
-    // &.map0 {
-    //   .work {
-    //     transform: translate(-15px, 0px) translateZ(400px);
-    //   }
-    //   .travel {
-    //     transform: translate(15px, -2px) translateZ(30px);
-    //   }
-    // }
-
-    // &.map1 {
-    //   .work {
-    //     transform: translateZ(30px);
-    //   }
-
-    //   .travel {
-    //     transform: translateZ(400px);
-    //   }
-    // }
   }
 
   .number {
     font-size: 18px;
+  }
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 @keyframes move {

@@ -2,7 +2,7 @@
   <div class="container flex-col">
     <div class="btns flex-col" v-if="loadingPercent === 1">
       <div class="start" @click="start">新的旅程</div>
-      <div class="history">继续征途</div>
+      <div class="history" @click="getRecord">继续征途</div>
     </div>
     <div class="loading-ui">
       <div class="text flex-row">
@@ -18,20 +18,36 @@
 <script lang="ts">
 import UserCard from '@/components/UserCard.vue'
 import { EmitsOptions, ref, SetupContext } from 'vue'
-import { PersonType } from '@/assets/types'
+import { GameState, PersonType } from '@/assets/types'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import { preLoadAllFile } from '@/assets/preload'
 import { Dialog } from 'vant'
+import { getItem } from '@/assets/index'
 export default {
   name: 'GameMenu',
   components: { UserCard },
   setup(props: unknown, ctx: SetupContext<EmitsOptions>) {
     const store = useInjector(GameStateStore)
+    if (!store) throw new Error('未获取GameStateStore')
     // let userList = ref<Array<PersonType>>()
     const startGame = (players: Array<PersonType>) => {
-      store?.resetGameState(players)
+      store.resetGameState(players)
       ctx.emit('start-new', players)
+    }
+
+    const getRecord = () => {
+      const gameStatus = getItem<GameState>('game-status')
+      if (!gameStatus) {
+        Dialog.alert({
+          title: '错误',
+          message: '未找到游戏记录',
+        })
+        return
+      }
+      store.setGameState(gameStatus)
+
+      ctx.emit('read-record', gameStatus)
     }
 
     const startRef = ref<InstanceType<typeof UserCard>>()
@@ -59,6 +75,7 @@ export default {
 
     return {
       startGame,
+      getRecord,
       start,
       startRef,
       loadingPercent,

@@ -10,6 +10,13 @@
           <div class="header">
             {{ address.options.name }}
           </div>
+          <div class="points flex-col">
+            <!-- {{ unionReward(address.options.reward) }} -->
+            <span class="p-text" v-for="(r, index) in address.options.reward" :key="index">
+              {{ `${index}级:${r}` }}
+            </span>
+          </div>
+
           <div class="image" :style="{ backgroundImage: `url(${address.options.imageUrl})` }"></div>
           <!-- <img class="image" :src="address.options.imageUrl" alt="" /> -->
           <div class="star-wrap">
@@ -98,6 +105,10 @@ export default defineComponent({
       visible.value = false
     }
 
+    const unionReward = (reward: Array<number>) => {
+      return reward.join('|')
+    }
+
     return {
       visible,
       selectIds,
@@ -105,6 +116,7 @@ export default defineComponent({
       show,
       selectAddress,
       submit,
+      unionReward,
     }
   },
 })
@@ -119,7 +131,7 @@ export default defineComponent({
 .body {
   margin: 8px auto 0;
   // width: 35rem;
-  width: 350px;
+  // width: 420px;
   flex-wrap: wrap;
   justify-content: space-around;
 
@@ -134,6 +146,17 @@ export default defineComponent({
     .header {
       margin-top: 4px;
       flex-shrink: 0;
+    }
+    .points {
+      // margin-top: 8px;
+      font-size: 12px;
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+
+      .p-text {
+        text-align: left;
+      }
     }
     .image {
       flex-grow: 1;
@@ -159,7 +182,7 @@ export default defineComponent({
     }
 
     &.active {
-      box-shadow: 0px 0px 5px 8px #ed6a0c;
+      box-shadow: 0px 0px 3px 4px #ed6a0c;
     }
   }
 }

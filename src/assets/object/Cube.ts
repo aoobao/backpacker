@@ -2,17 +2,17 @@ import { THREE } from '@/assets/three/lib'
 import { createCubeMaterials } from './cube-material'
 import PhysicsWorld from '@/assets/physics'
 import { randBetween } from '@/assets/index'
-export interface CubeOptions {
-  map1: THREE.Object3D
-  // map2: THREE.Object3D
-}
+// export interface CubeOptions {
+//   map0: THREE.Object3D
+//   // map2: THREE.Object3D
+// }
 
 export default class Cube {
   instance: THREE.Mesh
   size = 14
-  map1: THREE.Object3D
-  constructor(opts: CubeOptions) {
-    this.map1 = opts.map1
+  map?: THREE.Object3D
+  constructor() {
+    // this.map0 = opts.map0
 
     const geometry = new THREE.BoxGeometry(this.size, this.size, this.size)
 
@@ -67,7 +67,18 @@ export default class Cube {
     return ~~maxName
   }
 
-  async show(physicsWorld: PhysicsWorld, speed: number, position: [number, number, number] = [0, 0, 5]) {
+  hide() {
+    if (this.map) {
+      this.map.remove(this.instance)
+      this.map = undefined
+    }
+  }
+
+  async show(physicsWorld: PhysicsWorld, speed: number, map: THREE.Object3D, position: [number, number, number] = [0, 0, 5]) {
+    if (this.map) {
+      this.map.remove(this.instance)
+    }
+
     this.instance.position.set(...position)
 
     const x = (randBetween(-360, 360) * Math.PI) / 180
@@ -76,7 +87,10 @@ export default class Cube {
 
     this.instance.rotation.set(x, y, z)
 
-    this.map1.add(this.instance)
+    map.add(this.instance)
+    this.map = map
+
+    // this.map0.add(this.instance)
     return physicsWorld.addBox(this, speed)
   }
 

@@ -30,7 +30,7 @@ export interface Options {
   // color?: string
   imageUrl?: string
   rewardIndex?: number // 机会类型 0 得到1分 1 可以选择和某个人交换位置 2 向所有人收取200元 3 在你的2张打工卡上各放1个经验标记
-  reward?: Array<number> // 打工点奖励 [新手 一级 二级 老手]
+  reward?: [number, number, number, number] // 打工点奖励 [新手 一级 二级 老手] Array<number>
   level?: number // 当前奖励级别
   texts?: Array<string> // ['亚洲区','印度','泰姬','玛哈陵']
   color?: string
@@ -62,6 +62,7 @@ export interface GameState {
   workMapList: Array<MapAddress>
   travelMapList: Array<MapAddress>
   currentPlayerId?: number
+  hotCitys: [Array<MapAddress>, Array<MapAddress>, Array<MapAddress>, Array<MapAddress>]
   // env?: ThreeEnvironment
 }
 
@@ -83,6 +84,11 @@ export interface RectType {
   y: number
   width: number
   height: number
+}
+
+export interface HotCity {
+  address: MapAddress
+  point: number
 }
 
 // 初始化three环境基本参数.

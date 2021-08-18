@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <GameMenu v-if="status === 0" @start-new="startNewGame" />
-    <GameView v-if="status === 1" />
+    <GameMenu v-if="status === 0" @start-new="startNewGame" @read-record="readRecord" />
+    <GameView v-if="status === 1" @over="gameOver" />
   </div>
 </template>
 <script lang="ts">
@@ -11,7 +11,7 @@ import GameView from './GameView/index.vue'
 export default defineComponent({
   components: { GameMenu, GameView },
   setup() {
-    // 0 游戏菜单 1 游戏进行中 4 游戏结束
+    // 0 游戏菜单 1 游戏进行中
     const status = ref(0)
 
     const startNewGame = () => {
@@ -19,9 +19,19 @@ export default defineComponent({
       status.value = 1
     }
 
+    const readRecord = () => {
+      status.value = 1
+    }
+
+    const gameOver = () => {
+      status.value = 0
+    }
+
     return {
       status,
       startNewGame,
+      readRecord,
+      gameOver,
     }
   },
 })

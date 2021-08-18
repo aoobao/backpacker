@@ -21,7 +21,7 @@ export default defineComponent({
     let toResolve: (speed: number) => void
 
     // 最高高度500
-    const maxHeight = ref(600)
+    const maxHeight = ref(300)
     const minHeightPercent = 0.2
     let isUp = true // 是否增加值.
     const nowHeightPercent = ref(minHeightPercent)
@@ -96,9 +96,9 @@ export default defineComponent({
   z-index: 1000;
   position: fixed;
   right: 0;
-  bottom: 50px;
-  width: 40vw;
-  font-size: 48px;
+  bottom: 20px;
+  width: 100px;
+  font-size: 16px;
   // height: 40%;
 
   // align-items: center;
@@ -113,14 +113,14 @@ export default defineComponent({
       text-shadow: orange 2px 2px 2px, orange -2px -2px 2px;
     }
     .icon {
-      width: 20vw;
-      height: 20vw;
+      width: 40px;
+      height: 40px;
       background-image: url('./touch.gif');
       background-size: 100% 100%;
     }
   }
   .bar {
-    width: 30px;
+    width: 15px;
     // height: 500px;
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;

@@ -1,10 +1,10 @@
 <script lang="ts">
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
-import { defineComponent, ref, onBeforeMount, onMounted, watch } from 'vue'
+import { defineComponent, ref, onBeforeMount, onMounted, watch, watchEffect } from 'vue'
 import { THREE } from '@/assets/three/lib'
 import { createStar } from '@/assets/index'
-import TWEEN from '@tweenjs/tween.js'
+import TWEEN, { Tween } from '@tweenjs/tween.js'
 import { createAnimation } from '@/assets'
 // import { workMapList } from '@/assets/setting'
 import { createType0Canvas, createWorkCanvas, createRewardCanvas } from '@/assets/canvas-background'
@@ -22,7 +22,8 @@ export default defineComponent({
     const mapGeometry = new THREE.PlaneGeometry(254, 254)
     const mapMaterial = new THREE.MeshBasicMaterial({ color: 0x3f4470, side: THREE.DoubleSide })
     const map = new THREE.Mesh(mapGeometry, mapMaterial)
-    if (store.gameState.activeMap === 1) map.visible = false
+    map.position.z = -1000
+    map.visible = false
 
     // logo
     const logoGeometry = new THREE.PlaneGeometry(140, 82)
@@ -34,16 +35,46 @@ export default defineComponent({
     logo.position.z = 0.5
     map.add(logo)
 
-    watch(
-      () => store.gameState.activeMap,
-      val => {
-        if (val === 0) {
-          map.visible = true
-        } else {
+    let tween: Tween<object> | null
+
+    watchEffect(() => {
+      const val = store.gameState.activeMap
+      if (tween) {
+        tween.stop()
+        tween = null
+      }
+
+      if (val === 0) {
+        map.visible = true
+        const target = { z: -30 }
+        const t = Math.abs(map.position.z + target.z)
+
+        // console.log(t)
+        tween = createAnimation(map.position, target, t, TWEEN.Easing.Linear.None)
+        tween.onComplete(() => {
+          tween = null
+        })
+      } else {
+        const target = { z: -1000 }
+        const t = Math.abs(target.z + map.position.z)
+        tween = createAnimation(map.position, target, t, TWEEN.Easing.Linear.None)
+        tween.onComplete(() => {
           map.visible = false
-        }
-      },
-    )
+          tween = null
+        })
+      }
+    })
+
+    // watch(
+    //   () => store.gameState.activeMap,
+    //   val => {
+    //     if (val === 0) {
+    //       // map.visible = true
+    //     } else {
+    //       map.visible = false
+    //     }
+    //   },
+    // )
 
     const createMaterial = async (m: MapAddress): Promise<THREE.Material> => {
       const player = store?.gameState.players.find(t => t.id === m.options.playerId)
@@ -56,7 +87,8 @@ export default defineComponent({
         const material = new THREE.MeshBasicMaterial({ map: texture })
         return material
       } else if (m.type === PointType.WORK) {
-        const canvas = await createWorkCanvas(m.options?.name || '未命名', player.color2, m.options?.imageUrl, m.width * 10, m.height * 10)
+        // const canvas = await createWorkCanvas(m.options?.name || '未命名', player.color2, m.options?.imageUrl, m.width * 10, m.height * 10)
+        const canvas = await createWorkCanvas(m, player.color2)
         const texture = new THREE.CanvasTexture(canvas)
         texture.needsUpdate = true
 
@@ -72,6 +104,7 @@ export default defineComponent({
       }
     }
 
+    let workAddressCount = 0
     // 地图棋盘格子
     store.gameState.workMapList.forEach(async m => {
       const geometry = new THREE.PlaneGeometry(m.width, m.height)
@@ -89,6 +122,13 @@ export default defineComponent({
       }
 
       map.add(mesh)
+      workAddressCount++
+
+      if (workAddressCount === store.gameState.workMapList.length) {
+        if (isLoad.value) {
+          emit('over')
+        }
+      }
     })
 
     const init = () => {
@@ -98,15 +138,19 @@ export default defineComponent({
         // console.warn('three环境未获取')
         throw new Error('three环境未获取')
       }
-      map.position.z = -30
       // map.rotation.z = -Math.PI * 2
       env.scene.add(map)
 
-      setTimeout(() => {
-        store?.setMap1(map)
-        isLoad.value = true
+      store.setMap0(map)
+      isLoad.value = true
+
+      if (workAddressCount === store.gameState.workMapList.length) {
         emit('over')
-      }, 100)
+      }
+
+      // setTimeout(() => {
+      //   emit('over')
+      // }, 100)
 
       // const tween = createAnimation(map.rotation, { z: 0 }, 1000)
 
@@ -129,11 +173,10 @@ export default defineComponent({
       mapMaterial.dispose()
     })
 
-    function addStar(address: MapAddress): Promise<boolean> {
+    function addStar(address: MapAddress, level?: number): Promise<boolean> {
       const star = createStar()
       const addressName = `work-${address.index}`
-      // const position = address.position
-      const count = address.options.level || 1
+      const count = level ? level : address.options.level || 1
 
       const scale = {
         x: 0.15,

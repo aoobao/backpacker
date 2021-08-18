@@ -17,6 +17,11 @@ export interface ActionType {
   action: THREE.AnimationAction
 }
 
+export interface Offset {
+  x: number
+  y: number
+}
+
 export default class Player {
   instance: THREE.Object3D
   player: PersonType
@@ -36,7 +41,7 @@ export default class Player {
     this.gltf = opts.gltf
     this.instance = opts.gltf.scene.clone()
     this.mixer = new THREE.AnimationMixer(this.instance)
-    const scaleNumber = 8
+    const scaleNumber = 4
     this.instance.scale.set(scaleNumber, scaleNumber, scaleNumber)
     this.instance.rotateX((90 * Math.PI) / 180)
     this.map0 = opts.map0
@@ -152,10 +157,13 @@ export default class Player {
     return new Promise<MapAddress>(resolve => {
       const address = getNextAddress(this)
       const targetPos = address.position
+
+      const offset = this.getOffset(address)
+
       // 目标位置
       const target = {
-        x: targetPos[0],
-        y: targetPos[1],
+        x: targetPos[0] + offset.x, // 重叠的时候稍微分开一点
+        y: targetPos[1] + offset.y,
         z: targetPos[2],
       }
 
@@ -180,9 +188,11 @@ export default class Player {
   changeAddress(address: MapAddress) {
     const targetPos = address.position
     // 目标位置
+
+    const offset = this.getOffset(address)
     const target = {
-      x: targetPos[0],
-      y: targetPos[1],
+      x: targetPos[0] + offset.x,
+      y: targetPos[1] + offset.y,
       z: targetPos[2],
     }
 
@@ -201,16 +211,48 @@ export default class Player {
     })
   }
 
+  changeMap(address: MapAddress, map: 0 | 1): Promise<void> {
+    return new Promise(resolve => {
+      const offset = this.getOffset(address)
+      this.player.map = map
+      this.instance.parent?.remove(this.instance)
+      const group = map === 0 ? this.map0 : this.map1
+      if (map === 0) {
+        this.player.map0Index = address.index
+      } else {
+        this.player.map1Index = address.index
+      }
+      this.instance.position.set(...address.position)
+      group.add(this.instance)
+
+      // 下落效果
+      const z = this.instance.position.z
+      this.instance.position.z += 20
+
+      this.instance.position.x += offset.x
+      this.instance.position.y += offset.y
+
+      const tween = createAnimation(this.instance.position, { z }, 500, TWEEN.Easing.Quartic.In)
+
+      tween.onComplete(() => {
+        this.fixLookat(50)
+        resolve()
+      })
+    })
+  }
+
   // 修正人物的方向
   fixLookat(duration = 500): Promise<void> {
     return new Promise(resolve => {
       // const address = this.getNextAddress()
       const address = getNextAddress(this)
+      const offset = this.getOffset(address)
+
       const position = address.position
       const p = this.instance.position
       // const rotation = this.instance.rotation
 
-      const angle = getAngle(p.x, p.y, position[0], position[1]) + 90
+      const angle = getAngle(p.x, p.y, position[0] + offset.x, position[1] + offset.y) + 90
       // console.log('人物位置:', p.x, p.y, p.z, '目标地点:', ...position, '人物当前旋转:', rotation.x, rotation.y, rotation.z, angle)
 
       const rotationY = (angle * Math.PI) / 180
@@ -235,6 +277,28 @@ export default class Player {
     const delta = e.delta as number
 
     this.mixer.update(delta)
+  }
+
+  getOffset(address: MapAddress): Offset {
+    const x = address.position[0]
+    const y = address.position[1]
+
+    const offset: Offset = {
+      x: 0,
+      y: 0,
+    }
+
+    const index = this.player.id - 1
+    const offsets = [-7.5, -2.5, 2.5, 7.5]
+    const num = offsets[index]
+
+    if (Math.abs(x) >= Math.abs(y)) {
+      offset.x = num
+    } else {
+      offset.y = num
+    }
+
+    return offset
   }
 
   destroy() {

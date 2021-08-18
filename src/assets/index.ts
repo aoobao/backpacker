@@ -3,7 +3,26 @@ import { Toast, ToastPosition, Dialog } from 'vant'
 import { THREE } from '@/assets/three/lib'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
-import { RectType } from './types'
+import { PersonType, RectType } from './types'
+import store from 'store'
+import { PREFIX } from '@/config'
+import { bus, ACTION } from '@/assets/bus'
+
+export function setItem(name: string, value: any) {
+  const key = PREFIX + name
+  return store.set(key, value)
+}
+
+export function getItem<T>(name: string): T {
+  const key = PREFIX + name
+  const value = store.get(key) as T
+  return value
+}
+
+export function removeItem(name: string) {
+  const key = PREFIX + name
+  store.remove(key)
+}
 
 export function numberToRgb(number: number) {
   const r = ~~(number / 0xff00)
@@ -28,6 +47,15 @@ export function createAnimation(from: object, to: object, duration?: number, eas
   return tween
 }
 
+export function appendMessage(msg: string, player: PersonType, isShowToast = true) {
+  if (isShowToast) {
+    const st = `玩家${player.name}${msg}`
+    showMessage(st)
+  }
+
+  bus.emit(ACTION.APPEND_MESSAGE, { message: msg, player: player })
+}
+
 export function showMessage(msg: string, duration = 2000, position: ToastPosition = 'bottom') {
   Toast({
     message: msg,
@@ -36,7 +64,7 @@ export function showMessage(msg: string, duration = 2000, position: ToastPositio
   })
 }
 
-export function confirm(text: string, title = '提示') {
+export function confirm(text: string, title = '提示'): Promise<boolean> {
   return new Promise(resolve => {
     Dialog.confirm({
       title: title,

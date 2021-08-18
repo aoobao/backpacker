@@ -19,7 +19,7 @@ export default defineComponent({
       visible.value = false
     }
 
-    const show = (val: number, closeDelay = 3000) => {
+    const show = (val: number, closeDelay = 8000) => {
       if (tick) {
         clearTimeout(tick)
         tick = 0

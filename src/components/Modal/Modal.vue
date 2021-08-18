@@ -1,11 +1,11 @@
 <template>
-  <div :class="{ 'md-overlay': show }">
+  <div :class="{ 'md-overlay': show, 'pointer-none': !mask }">
     <!-- 
-animate__animated 
+animate__animated :class="{ 'pointer-none': !mask }"
       animate__swing
      -->
     <transition name="fade" enter-active-class="animate__animated animate__jackInTheBox" leave-active-class="animate__animated animate__bounceOut" @after-leave="afterLeave">
-      <div v-if="visible" @click.stop="() => {}" :style="modalStyle" class="md-modal flex-col">
+      <div v-if="visible" :style="modalStyle" class="md-modal flex-col">
         <div class="md-header flex-row" v-if="title">
           {{ title }}
         </div>
@@ -48,6 +48,10 @@ export default defineComponent({
       default: null,
     },
     showClose: {
+      type: Boolean,
+      default: true,
+    },
+    mask: {
       type: Boolean,
       default: true,
     },

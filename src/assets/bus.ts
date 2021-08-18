@@ -8,6 +8,7 @@ export const ACTION = {
   WIN: 'win',
   CHANGE_POSITION: 'change position', // 玩家更换位置 {player:PersonType,map:0|1,index:number}
   ADD_LEVEL: 'add level', // 增加熟练度 { index }
+  APPEND_MESSAGE: 'append message', // {message:string,player:PersonType}
 }
 
 window.addEventListener('resize', () => {

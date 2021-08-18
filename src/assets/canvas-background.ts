@@ -2,10 +2,24 @@ import { rewardTextList } from '@/assets/object.json'
 import { getFileById } from './preload'
 import { MapAddress } from './types'
 import { getCenterRect } from '@/assets/index'
+import { THREE } from '@/assets/three/lib'
 // 创建各种canvas纹理
 const FONT_STYLE = 'FangSong'
 
-export function createCityCanvas(m: MapAddress): Promise<HTMLCanvasElement> {
+export async function createHotCityCard(m: MapAddress, pointValue: number) {
+  const geometry = new THREE.PlaneGeometry(m.width, m.height)
+  const canvas = await createCityCanvas(m, pointValue)
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.needsUpdate = true
+  const material = new THREE.MeshBasicMaterial({ map: texture })
+
+  const mesh = new THREE.Mesh(geometry, material)
+  mesh.name = 'hot-city-' + m.index
+
+  return mesh
+}
+
+export function createCityCanvas(m: MapAddress, pointValue = 0): Promise<HTMLCanvasElement> {
   return new Promise((resolve, reject) => {
     const width = m.width * 10
     const height = m.height * 10
@@ -59,12 +73,17 @@ export function createCityCanvas(m: MapAddress): Promise<HTMLCanvasElement> {
 
         ctx.drawImage(image, borderWidth + rectRange.x, 0.5 * height + rectRange.y, rectRange.width, rectRange.height)
 
-        // test
-        // ctx.fillStyle = 'yellow'
-        // ctx.fillRect(borderWidth, 0.5 * height, maxWidth, maxHeight)
-
         ctx.strokeStyle = '#000'
         ctx.strokeRect(1, 1, width - 2, height - 2)
+
+        if (pointValue) {
+          const color = '#ffc428'
+          addStar(ctx, width * 0.6, height * 0.5, width * 0.15, color)
+          ctx.fillStyle = color
+          ctx.textAlign = 'left'
+          ctx.font = `bold ${width * 0.15}px ${FONT_STYLE}`
+          ctx.fillText(`×${pointValue}`, width * 0.72, height * 0.53)
+        }
 
         resolve(canvas)
       })
@@ -75,7 +94,15 @@ export function createCityCanvas(m: MapAddress): Promise<HTMLCanvasElement> {
 }
 
 // 打工地点创建
-export function createWorkCanvas(name: string, color: string, imageUrl: string | undefined, width: number, height: number): Promise<HTMLCanvasElement> {
+// name: string, color: string, imageUrl: string | undefined, width: number, height: number
+export function createWorkCanvas(m: MapAddress, color: string): Promise<HTMLCanvasElement> {
+  const width = m.width * 10
+  const height = m.height * 10
+  const name = m.options.name || '未命名'
+  const imageUrl = m.options.imageUrl
+  const borderWidth = 0.05
+  const offsetTop = 0.25
+  
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas')
     canvas.width = width
@@ -94,19 +121,41 @@ export function createWorkCanvas(name: string, color: string, imageUrl: string |
     ctx.textBaseline = 'middle'
     ctx.fillStyle = '#000'
     ctx.fillText(name, width / 2, height * 0.1)
-    const image = new Image()
-    image.src = imageUrl || require('@/assets/image/icon/temp.jpg')
 
-    // console.log(width * 0.9, height * 0.7)
+    ctx.restore()
 
-    image.onload = () => {
-      ctx.drawImage(image, width * 0.05, height * 0.25, width * 0.9, height * 0.7)
-      ctx.restore()
-      resolve(canvas)
-    }
+    if (imageUrl) {
+      const image = new Image()
+      image.src = imageUrl || require('@/assets/image/icon/temp.jpg')
 
-    image.onerror = err => {
-      reject(err)
+      image.onload = () => {
+        ctx.drawImage(image, width * borderWidth, height * offsetTop, width * (1 - borderWidth * 2), height * (1 - offsetTop - borderWidth))
+
+        resolve(canvas)
+      }
+
+      image.onerror = err => {
+        reject(err)
+      }
+    } else {
+      const id = 'work-' + m.index
+      getFileById(id)
+        .then(res => {
+          const image = res.object as HTMLImageElement
+          const maxHeight = 0.7 * height
+          const maxWidth = width - 2 * borderWidth
+          ctx.fillStyle = '#fff'
+          ctx.fillRect(width * borderWidth, height * offsetTop, width * (1 - borderWidth * 2), height * (1 - offsetTop - borderWidth))
+
+          const rectRange = getCenterRect(image.width, image.height, maxWidth, maxHeight)
+
+          ctx.drawImage(image, borderWidth + rectRange.x, offsetTop * height + rectRange.y, rectRange.width, rectRange.height)
+
+          resolve(canvas)
+        })
+        .catch(err => {
+          reject(err)
+        })
     }
   })
 }
@@ -225,7 +274,7 @@ export function createStartPointCanvas(backgroundColor: string, width: number, h
   return canvas
 }
 
-export function createBigCityCanvas(m: MapAddress): Promise<HTMLCanvasElement> {
+export function createBigCityCanvas(m: MapAddress, pointValue = 0): Promise<HTMLCanvasElement> {
   const width = m.width * 10
   const height = m.height * 10
   const canvas = document.createElement('canvas')

@@ -108,7 +108,11 @@ export default class PhysicsWorld {
 
         if (this.syncInstanceValue(box)) {
           this.bodyList.splice(i, 1)
-          this.world.remove(box.bodyBox)
+
+          // 延迟去除,多个骰子
+          setTimeout(() => {
+            this.world.remove(box.bodyBox)
+          }, 5000)
           box.resolve()
         }
         // instance.position.set(pos.x, pos.y, pos.z)

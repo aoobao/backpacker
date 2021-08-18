@@ -4,11 +4,14 @@
     <ThreeWrap>
       <WorkMap @over="map1Init" ref="workMap" />
       <TravelMap @over="map2Init" ref="travelMap" />
-      <HandUpDisplay v-if="isFinish" />
+      <HandUpDisplay v-if="isFinish" :enabled="enabled" />
       <TouchView ref="touchRef" />
       <NumberView ref="numberRef" />
       <!-- <TextView ref="textRef" /> -->
       <RewardView ref="rewardRef" />
+      <StepNumber ref="stepRef" />
+      <WinView ref="winRef" />
+      <OverView ref="overRef" />
     </ThreeWrap>
   </div>
 </template>
@@ -21,40 +24,46 @@ import ThreeWrap from './ThreeWrap.vue'
 import WorkMap from './WorkMap.vue'
 import TravelMap from './TravelMap.vue'
 import HandUpDisplay from './HandUpDisplay.vue'
-import { delay, showMessage, confirm } from '@/assets/index'
+import { delay, showMessage, confirm, setItem, removeItem, appendMessage } from '@/assets/index'
 import { FileItem, getFileById } from '@/assets/preload'
 import Player from '@/assets/object/Player'
-// import { THREE } from '@/assets/three/lib'
-// import { Dialog } from 'vant'
-// import { getAddressByIndex } from '@/assets/setting'
 import { ACTION, bus } from '@/assets/bus'
 import Cube from '@/assets/object/Cube'
 import TouchView from '@/components/TouchView/index.vue'
 import NumberView from '@/components/NumberView/index.vue'
-// import TextView from '@/components/TextView.vue'
+import StepNumber from '@/views/GameView/StepNumber.vue'
+import OverView from '@/views/GameView/OverView.vue'
+import WinView from '@/components/WinView/index.vue'
 import RewardView from '@/views/GameView/Reward/index.vue'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { MapAddress, PersonType, PointType } from '@/assets/types'
-// import { Dialog } from 'vant'
+import { workMapList } from '@/assets/setting'
+import { chooseStartPoint, chooseGoTravel, chooseTravelContinue, getStep } from '@/assets/ai'
 export default defineComponent({
-  components: { ThreeWrap, WorkMap, TravelMap, HandUpDisplay, TouchView, NumberView, RewardView },
+  components: { ThreeWrap, WorkMap, TravelMap, HandUpDisplay, TouchView, NumberView, RewardView, StepNumber, WinView, OverView },
   // components: { HandUpDisplay },
-  setup() {
+  setup(props, { emit }) {
     const numberRef = ref<InstanceType<typeof NumberView>>()
     const workMap = ref<InstanceType<typeof WorkMap>>()
     const travelMap = ref<InstanceType<typeof TravelMap>>()
     const touchRef = ref<InstanceType<typeof TouchView>>()
     // const textRef = ref<InstanceType<typeof TextView>>()
+    const winRef = ref<InstanceType<typeof WinView>>()
+    const stepRef = ref<InstanceType<typeof StepNumber>>()
     const rewardRef = ref<InstanceType<typeof RewardView>>()
+    const overRef = ref<InstanceType<typeof OverView>>()
     const store = useInjector(GameStateStore)
     if (!store) throw new Error('未获取GameStateStore')
     const map1Finish = ref(false)
     const isLoad = ref(false)
     const map2Finish = ref(false)
 
+    const enabled = ref(false)
+
     let playerFile: FileItem
     let players: Array<Player>
     let cube: Cube
+    let cube2: Cube
     // const playerFile = await getFileById('player')
     getFileById('player').then(file => {
       playerFile = file
@@ -78,36 +87,32 @@ export default defineComponent({
       },
     )
 
-    watch(
-      () => store.gameState.activeMap,
-      val => {
-        toggleMap(val)
-      },
-    )
-
     const init = () => {
+      const env = store.env
+      if (!env) throw new Error('threejs 环境未找到')
       players = store.gameState.players.map(p => {
         // const object = playerFile.object.scene as THREE.Scene
         const gltf = playerFile.object as GLTF
         return new Player({
           player: p,
           gltf: gltf,
-          map0: store.map1!,
-          map1: store.map2!,
+          map0: store.map0!,
+          map1: store.map1!,
         })
       })
       bus.on(ACTION.RENDER, render)
       bus.on(ACTION.CHANGE_POSITION, playerChangePosition)
       bus.on(ACTION.ADD_LEVEL, addLevelByAddressIndex)
 
-      const player = store.findByPlayerId(store.gameState.currentPlayerId!)
+      initMapStar()
 
-      toggleMap(player.map)
+      env.control!.setLookAt(0, -245, 170, 0, 0, 0, true)
 
       // 开场动画
       delay(1).then(() => {
         // 骰子
-        cube = new Cube({ map1: store.map1! })
+        cube = new Cube()
+        cube2 = new Cube()
 
         gameLoop()
       })
@@ -122,16 +127,13 @@ export default defineComponent({
     const gameLoop = async () => {
       const env = store.env
       if (!env) throw new Error('未获取3d环境')
-      // const currentPlayerId = store?.gameState.currentPlayerId
-      // const player = players.find(t => t.player.id === currentPlayerId)
 
-      // if (!player) throw new Error('当前活动人员获取失败')
+      if (!store.gameState.currentPlayerId) {
+        console.log('currentPlayerId异常,结束循环')
+        return
+      }
 
-      const player = getPlayerById(store.gameState.currentPlayerId!)
-
-      // textRef.value?.show(`${player.player.name}进行中`)
-
-      // console.log(player.player.map, store.gameState.activeMap)
+      const player = getPlayerById(store.gameState.currentPlayerId)
 
       // 切换地图
       if (player.player.map !== store.gameState.activeMap) {
@@ -143,23 +145,84 @@ export default defineComponent({
       // 聚焦当前玩家
       workMap.value!.lookAtPosition(player!.instance.position)
 
+      if (!player.player.isAI) enabled.value = true
+
+      appendMessage('游戏进行中', player.player, false)
+
+      // 如果玩家在旅游城市,询问是否返回打工
+      if (player.player.map === 1) {
+        // 如果小于500元,直接回来打工
+        if (player.player.money < 500) {
+          appendMessage('金币不足500,回家打工赚钱', player.player)
+
+          const address = workMapList.find(t => t.index === player.player.index)
+          if (!address) throw new Error('未找到打工起始地址:index=' + player.player.index)
+          store.gameState.activeMap = 0
+          await player.changeMap(address, 0)
+        } else {
+          let travelContinue: boolean
+          if (player.player.isAI) {
+            travelContinue = chooseTravelContinue(player.player)
+          } else {
+            travelContinue = await confirm('继续旅游需要扣除500旅费,请问是否继续旅游?', '提示')
+          }
+          if (!travelContinue) {
+            // 不继续旅游
+            appendMessage(`结束旅游回来打工赚钱`, player.player)
+            const address = workMapList.find(t => t.index === player.player.index)
+            if (!address) throw new Error('未找到打工起始地址:index=' + player.player.index)
+            store.gameState.activeMap = 0
+            await player.changeMap(address, 0)
+          }
+        }
+      }
+
+      // 当前玩家是否最终处在旅游地图
+      const isTravel = player.player.map === 1
+
+      if (isTravel) {
+        store.changeMoney(player.player.id, -500) // 扣除500旅费
+        appendMessage('继续旅游,扣除500旅费', player.player)
+      }
+
       let speed: number
       // 等待用户扔骰子
       if (!player.player.isAI) {
         speed = await touchRef.value!.show()
       } else {
+        await delay(1)
         speed = 0.8 * Math.random() + 0.2
       }
 
-      // 关闭文字
-      // textRef.value?.close()
+      enabled.value = false // 禁止切换地图.
+
+      if (player.player.map !== store.gameState.activeMap) {
+        // await toggleMap(player.player.map)
+        store.gameState.activeMap = player.player.map
+        await delay(2)
+      }
+
       // 等待骰子转动结束
-      await cube.show(store.physicsWorld!, speed)
+      cube2.hide()
+      if (!isTravel) {
+        await cube.show(store.physicsWorld!, speed, store.map0!)
+      } else {
+        await cube.show(store.physicsWorld!, speed, store.map1!, [5, 5, 5])
+        await cube2.show(store.physicsWorld!, speed, store.map1!, [-5, -5, 5])
+      }
+
       // 获取骰子点数
-      const value = cube.getValue()
+      let value = cube.getValue()
+
+      if (isTravel) {
+        value += cube2.getValue()
+      }
+
       // const value = 5
       // 显示骰子点数在屏幕上
       numberRef.value?.show(value)
+
+      appendMessage(`前进${value}格`, player.player, false)
 
       let isChargeTravel = false
       // 用户在屏幕上行动
@@ -167,44 +230,88 @@ export default defineComponent({
       for (let i = 0; i < value; i++) {
         await player.goNext()
 
-        if (player.isWork()) {
+        if (!isTravel) {
           const address = store.getCurrentAddress(player)
 
           if (address.index === player.player.index) {
             // 奖励500元
-            showMessage('路过发薪日,奖励500元')
+            appendMessage('路过发薪日,奖励500元', player.player)
             changeMoney(player, 500)
             // 用户到达自己起点的逻辑(是否要去旅游)
-            const goTravel = player.player.isAI ? Math.random() > 0.5 : await confirm(`是否前往旅游地图?`)
+            const goTravel = player.player.isAI ? chooseGoTravel(player.player) : await confirm(`是否前往旅游地图?`)
 
             if (goTravel) {
               isChargeTravel = true
-              showMessage(`玩家${player.player.name}选择前往旅游地图旅游`)
-              // 切换旅游地图 TODO
+
               player.stopAnimate()
+              appendMessage(`前往旅游地图`, player.player)
+
+              store.gameState.activeMap = 1
+
+              let startAddress: MapAddress
+              if (player.player.isAI) {
+                startAddress = chooseStartPoint(store.gameState)
+              } else {
+                startAddress = await travelMap.value!.chooseStartPoint()
+              }
+              store.gameState.activeMap = 1
+              await player.changeMap(startAddress, 1)
+
+              await delay(0.5)
+
               break
             }
           }
         }
       }
-      player.stopAnimate()
+      // 隐藏骰子点数
+      numberRef.value?.close()
+
+      // 如果是旅游状态,可以向前走3步
+      if (isTravel) {
+        let step: number
+        if (player.player.isAI) {
+          step = getStep(player.player, travelMap.value!.getPointValue)
+          if (step > 0) {
+            appendMessage(`花费${step * 500}元,继续前进${step}格`, player.player)
+            store.changeMoney(player.player.id, -step * 500)
+          }
+          await delay(0.5)
+        } else {
+          step = await stepRef.value!.show(player.player.id)
+        }
+
+        for (let i = 0; i < step; i++) {
+          await player.goNext()
+        }
+      }
 
       if (!isChargeTravel) {
+        player.stopAnimate()
         // 处理角色业务逻辑
-        if (player.isWork()) {
+        if (!isTravel) {
           await detailWorkEvent(player)
         } else {
           await detailTravelEvent(player)
         }
       }
-
       // 切换下一个玩家
       const needNext = store.toggleNextPlayer()
+
       if (needNext) {
+        setItem('game-status', store.gameState)
+
+        if (player.player.isAI) {
+          await delay(2)
+        }
+
         gameLoop()
       } else {
-        // TODO
+        removeItem('game-status')
         // 游戏结束
+        await overRef.value!.show()
+
+        emit('over')
       }
     }
 
@@ -243,12 +350,12 @@ export default defineComponent({
           const money = address.options.reward![level]
           // 如果对方玩家在打工地图,给对方玩家加钱
           if (workPlayer.isWork()) {
-            showMessage(`路过${address.options.name},玩家${workPlayer.player.name}打工赚得金钱:${money}`)
+            appendMessage(`路过${address.options.name},${workPlayer.player.name}赚得金钱:${money}`, player.player)
 
             changeMoney(workPlayer, money)
           } else {
             // 给自己加钱
-            showMessage(`路过${address.options.name}的玩家${workPlayer.player.name}正在旅游,${player.player.name}代替打工赚的金钱:${money}`)
+            appendMessage(`路过${address.options.name},对方未在打工状态,${player.player.name}赚得金钱:${money}`, player.player)
 
             changeMoney(player, money)
           }
@@ -262,21 +369,28 @@ export default defineComponent({
       return true
     }
 
-    // 切换地图
-    const toggleMap = async (map: 0 | 1) => {
-      const env = store.env
-      if (!env) throw new Error('three环境未获取')
-
-      if (map === 0) {
-        env.control!.setLookAt(0, -245, 170, 0, 0, 0, true)
-      } else {
-        env.control!.setLookAt(0, -245, -830, 0, 0, -1000, true)
-      }
-    }
-
     // 处理旅游状态下的业务逻辑
-    async function detailTravelEvent(player: Player) {
-      // TODO
+    const detailTravelEvent = async (player: Player) => {
+      const index = player.player.map1Index // 当前用户所在地址
+      const hotCity = travelMap.value!.getPointValue(index)
+
+      if (hotCity !== null) {
+
+        appendMessage(`路过热门城市${hotCity.address.options.name},增加${hotCity.point}点积分`, player.player)
+
+        await travelMap.value!.removeHotCity(hotCity)
+
+        const isWin = store.addPoint(player.player.id, hotCity.point)
+
+        if (isWin) {
+          bus.emit(ACTION.WIN, player.player.id)
+          player.playWin()
+
+          await winRef.value!.show(player.player.id)
+        }
+      }
+
+      return true
     }
 
     // 金额变化
@@ -305,12 +419,25 @@ export default defineComponent({
         level++
         address.options.level = level
         // const cost = address.options.reward![level]
-
-        showMessage(`路过自己打工点${address.options.name},熟练度增加!`, 2000)
+        appendMessage(`路过${address.options.name},熟练度增加:${level}级`, player!.player)
         // 增加星星动画
         await workMap.value?.addStar(address)
         return true
       }
+    }
+
+    const initMapStar = () => {
+      store.gameState.workMapList.forEach(w => {
+        if (w.type === PointType.WORK) {
+          const level = w.options.level!
+
+          if (level > 0) {
+            for (let i = 1; i <= level; i++) {
+              workMap.value?.addStar(w, i)
+            }
+          }
+        }
+      })
     }
 
     return {
@@ -324,7 +451,11 @@ export default defineComponent({
       touchRef,
       numberRef,
       // textRef,
+      stepRef,
       rewardRef,
+      winRef,
+      overRef,
+      enabled,
     }
   },
 })

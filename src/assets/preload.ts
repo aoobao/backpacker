@@ -26,6 +26,126 @@ export const FILE_LIST: Array<FileItem> = [
     type: FILE_TYPE.IMAGE,
   },
   {
+    id: 'work-1',
+    path: require('@/assets/image/work/1.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-2',
+    path: require('@/assets/image/work/2.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-3',
+    path: require('@/assets/image/work/3.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-4',
+    path: require('@/assets/image/work/4.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-6',
+    path: require('@/assets/image/work/6.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-7',
+    path: require('@/assets/image/work/7.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-9',
+    path: require('@/assets/image/work/9.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-10',
+    path: require('@/assets/image/work/10.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-11',
+    path: require('@/assets/image/work/11.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-12',
+    path: require('@/assets/image/work/12.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-14',
+    path: require('@/assets/image/work/14.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-15',
+    path: require('@/assets/image/work/15.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-17',
+    path: require('@/assets/image/work/17.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-18',
+    path: require('@/assets/image/work/18.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-19',
+    path: require('@/assets/image/work/19.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-20',
+    path: require('@/assets/image/work/20.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-22',
+    path: require('@/assets/image/work/22.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-23',
+    path: require('@/assets/image/work/23.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-25',
+    path: require('@/assets/image/work/25.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-26',
+    path: require('@/assets/image/work/26.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-27',
+    path: require('@/assets/image/work/27.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-28',
+    path: require('@/assets/image/work/28.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-30',
+    path: require('@/assets/image/work/30.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
+    id: 'work-31',
+    path: require('@/assets/image/work/31.png'),
+    type: FILE_TYPE.IMAGE,
+  },
+  {
     id: 'travel-1',
     path: require('@/assets/image/travel/1.jpg'),
     type: FILE_TYPE.IMAGE,

@@ -90,11 +90,13 @@ export default defineComponent({
       env.height = dom.offsetHeight
 
       if (env.camera) {
-        // env.camera.aspect = env.width / env.height
+        env.camera.aspect = env.width / env.height
         env.camera.updateProjectionMatrix()
       }
 
       env.renderer.setSize(env.width, env.height)
+
+      console.log('resize')
     }
 
     onMounted(() => {
@@ -177,5 +179,6 @@ export default defineComponent({
 .three-container {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 </style>

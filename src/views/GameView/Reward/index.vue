@@ -4,7 +4,7 @@
   <AddLevel :count="2" ref="levelRef" />
 </template>
 <script lang="ts">
-import { showMessage, delay, randBetween } from '@/assets'
+import { showMessage, delay, randBetween, appendMessage } from '@/assets'
 import Player from '@/assets/object/Player'
 import { MapAddress } from '@/assets/types'
 import { defineComponent, ref } from 'vue'
@@ -91,7 +91,7 @@ export default defineComponent({
     const changePosition = async (player: Player) => {
       const change = (otherPlayerId: number) => {
         const otherPlayer = store.findByPlayerId(otherPlayerId)
-        showMessage(`玩家${player.player.name}选择和${otherPlayer.name}交换位置`)
+        appendMessage(`选择和${otherPlayer.name}交换位置`, player.player)
 
         const currentIndex = player.player.map0Index
         const targetIndex = otherPlayer.map0Index
@@ -144,7 +144,8 @@ export default defineComponent({
     }
 
     const chargeMoney = async (player: Player, num: number) => {
-      showMessage(`${player.player.name}向每个人收取200元钱`)
+
+      appendMessage('向每个人收取200元钱', player.player)
       let sum = 0
       store.gameState.players.forEach(p => {
         if (p.id === player.player.id) return
@@ -160,7 +161,8 @@ export default defineComponent({
     }
 
     const addPoints = async (player: Player, num: number) => {
-      showMessage(`${player.player.name}获得奖励:得到1点积分点`)
+
+      appendMessage('获得1点积分点', player.player)
       const isWin = store.addPoint(player.player.id, num)
 
       if (isWin) {
@@ -168,7 +170,6 @@ export default defineComponent({
         player.playWin()
         await winRef.value?.show(player.player.id)
       }
-      // console.log(player.player)
 
       return true
     }
