@@ -47,7 +47,7 @@ export default defineComponent({
       env.control.touches.two = CameraControls.ACTION.TOUCH_ZOOM
       env.control.touches.three = CameraControls.ACTION.TOUCH_ZOOM_TRUCK
 
-      env.control.dollySpeed = 0.4
+      env.control.dollySpeed = 0.8
       env.control.minPolarAngle = (0 * Math.PI) / 180
       env.control.maxPolarAngle = (70 * Math.PI) / 180
 
@@ -117,8 +117,8 @@ export default defineComponent({
       // env.control?.moveTo(0, 0, -700, true)
 
       // test
-      // const axesHelper = new THREE.AxesHelper(500)
-      // env.scene.add(axesHelper)
+      const axesHelper = new THREE.AxesHelper(500)
+      env.scene.add(axesHelper)
 
       tick = requestAnimationFrame(animate)
 

@@ -57,6 +57,8 @@ export default defineComponent({
     if (!store) throw new Error('未获取GameStateStore')
     const message = ref<HTMLElement>()
     const scroll = ref<HTMLElement>()
+    let tick = 0
+    const step = 10
 
     const messageList = ref<Array<string>>([])
 
@@ -76,12 +78,31 @@ export default defineComponent({
       return Math.max(top, 0)
     }
 
+    const stepScrollTop = (val: number) => {
+      let value = message.value!.scrollTop + step
+      if (value > val) value = val
+      message.value!.scrollTop = value
+
+      if (value < val) {
+        tick = setTimeout(() => {
+          stepScrollTop(val)
+        }, 1000 / 60)
+      }
+    }
+
     const scrollToBottom = () => {
       nextTick(() => {
         const value = scrollTopValue()
 
         if (value > 0) {
-          message.value!.scrollTop = value
+          if (tick) {
+            clearTimeout(tick)
+            tick = 0
+          }
+
+          stepScrollTop(value)
+
+          // message.value!.scrollTop = value
         }
       })
     }
@@ -90,7 +111,7 @@ export default defineComponent({
       const message = data.message as string
       const player = data.player as PersonType
 
-      const text = `【${player.name}】${message}`
+      const text = `[${player.name}] ${message}`
 
       messageList.value.push(text)
 
@@ -125,6 +146,11 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       bus.off(ACTION.APPEND_MESSAGE, appendText)
+
+      if (tick) {
+        clearTimeout(tick)
+        tick = 0
+      }
     })
 
     return {
@@ -199,13 +225,16 @@ export default defineComponent({
     border-top-right-radius: 4px;
     overflow: auto;
     padding-bottom: 4px;
-
+    .scroll {
+      margin-left: 4px;
+    }
     .message {
       text-align: left;
       color: #fff;
       font-size: 12px;
-      margin-left: 4px;
+      // margin-left: 4px;
       margin-top: 4px;
+      line-height: 16px;
     }
   }
 

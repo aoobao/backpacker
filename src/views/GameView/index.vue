@@ -143,7 +143,7 @@ export default defineComponent({
       }
 
       // 聚焦当前玩家
-      workMap.value!.lookAtPosition(player!.instance.position)
+      // workMap.value!.lookAtPosition(player!.instance.position)
 
       if (!player.player.isAI) enabled.value = true
 
