@@ -30,6 +30,7 @@ export default defineComponent({
     const logoTexture = loader.load(require('@/assets/image/logo.png'))
     const logoMaterial = new THREE.MeshLambertMaterial({
       map: logoTexture,
+      transparent: true,
     })
     const logo = new THREE.Mesh(logoGeometry, logoMaterial)
     logo.position.z = 0.5
