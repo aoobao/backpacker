@@ -42,6 +42,8 @@ export default class PhysicsWorld {
     // this.world.solver.iterations = 10
     const material = new CANNON.Material('ground')
 
+    const wallMaterial = new CANNON.Material('wall')
+
     // 地面
     const bodyGround = new CANNON.Body({
       mass: 0,
@@ -56,7 +58,7 @@ export default class PhysicsWorld {
       mass: 0,
       position: new CANNON.Vec3(WIDTH / 2, 0, 0),
       shape: new CANNON.Plane(),
-      material,
+      material: wallMaterial,
     })
 
     wall1.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), -Math.PI / 2)
@@ -65,7 +67,7 @@ export default class PhysicsWorld {
       mass: 0,
       position: new CANNON.Vec3(-WIDTH / 2, 0, 0),
       shape: new CANNON.Plane(),
-      material,
+      material: wallMaterial,
     })
 
     wall2.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2)
@@ -74,7 +76,7 @@ export default class PhysicsWorld {
       mass: 0,
       position: new CANNON.Vec3(0, WIDTH / 2, 0),
       shape: new CANNON.Plane(),
-      material,
+      material: wallMaterial,
     })
 
     wall3.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2)
@@ -83,17 +85,23 @@ export default class PhysicsWorld {
       mass: 0,
       position: new CANNON.Vec3(0, -WIDTH / 2, 0),
       shape: new CANNON.Plane(),
-      material,
+      material: wallMaterial,
     })
 
     wall4.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2)
 
-    const contactMaterial = new CANNON.ContactMaterial(material, cubeMaterial, {
-      friction: 0.3,
-      restitution: 0.7,
+    const groundContactMaterial = new CANNON.ContactMaterial(material, cubeMaterial, {
+      friction: 0.1,
+      restitution: 0.5,
     })
 
-    this.world.addContactMaterial(contactMaterial)
+    const wallContactMaterial = new CANNON.ContactMaterial(wallMaterial, cubeMaterial, {
+      friction: 0,
+      restitution: 1,
+    })
+
+    this.world.addContactMaterial(groundContactMaterial)
+    this.world.addContactMaterial(wallContactMaterial)
 
     this.world.addBody(bodyGround)
     this.world.addBody(wall1)
@@ -124,8 +132,8 @@ export default class PhysicsWorld {
         material: cubeMaterial,
       })
 
-      const x = 300 * speed * randPM()
-      const y = 300 * speed * randPM()
+      const x = 500 * speed * randPM()
+      const y = 500 * speed * randPM()
       const z = 300 + 300 * speed
 
       bodyBox.velocity.set(x, y, z)
