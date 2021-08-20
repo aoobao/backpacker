@@ -1,30 +1,31 @@
 <template>
   <div class="ui pointer-none" v-if="gameState">
-    <div class="player-status">
-      <div class="title" v-if="currentPlayer">{{ currentPlayer.name }}进行中...</div>
-      <div class="player-item flex-row" :class="{ active: gameState.currentPlayerId === player.id }" v-for="player in gameState.players" :key="player.id" :style="getStyle(player)">
-        <!-- <div class="active-status" v-if="gameState.currentPlayerId === player.id">→</div> -->
-        <span class="name text">姓名: {{ player.name }}</span>
-        <span class="text"
-          >金币:
-          <CountUp class="led number" :num="player.money" />
-        </span>
-
-        <span class="text">
-          积分:
-          <CountUp class="led number" :num="player.points" />
-        </span>
-        <span class="text">状态: {{ statusText(player) }}</span>
-
-        <!-- <span v-if="gameState.currentPlayerId === player.id" class="active-text">玩家进行中</span> -->
-      </div>
-    </div>
-
-    <div class="text-message-box pointer" ref="message">
-      <div class="scroll" ref="scroll">
-        <div class="message" v-for="(message, index) in messageList" :key="index">
-          {{ message }}
+    <div class="player-status" :class="{ 'show-more': showMore }">
+      <table class="gridtable">
+        <thead>
+          <tr>
+            <th>姓名</th>
+            <th>金币</th>
+            <th>积分</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tr :class="{ active: gameState.currentPlayerId === player.id }" v-for="player in gameState.players" :key="player.id">
+          <td :style="{ color: player.color }">{{ player.name }}</td>
+          <td><CountUp class="led number" :num="player.money" /></td>
+          <td style="width: 40px"><CountUp class="led number" :num="player.points" /></td>
+          <td style="width: 60px">{{ statusText(player) }}</td>
+        </tr>
+      </table>
+      <div class="text-message-box pointer" ref="message">
+        <div class="scroll" ref="scroll">
+          <div class="message" v-for="(message, index) in messageList" :key="index">
+            {{ message }}
+          </div>
         </div>
+      </div>
+      <div class="show-arrow pointer" @click="toggleShowMore">
+        {{ showMore ? '收缩' : '展开' }}
       </div>
     </div>
 
@@ -57,6 +58,15 @@ export default defineComponent({
     if (!store) throw new Error('未获取GameStateStore')
     const message = ref<HTMLElement>()
     const scroll = ref<HTMLElement>()
+
+    const showMore = ref(true)
+
+    const toggleShowMore = () => {
+      showMore.value = !showMore.value
+      setTimeout(() => {
+        scrollToBottom()
+      }, 300)
+    }
     let tick = 0
     const step = 10
 
@@ -162,6 +172,8 @@ export default defineComponent({
       message,
       scroll,
       messageList,
+      showMore,
+      toggleShowMore,
     }
   },
 })
@@ -190,51 +202,69 @@ export default defineComponent({
     position: absolute;
     left: 0;
     top: 0;
-    .player-item {
-      margin-left: 4px;
-      // padding-left: 16px;
-      align-items: center;
-      height: 30px;
-      position: relative;
-      &.active {
-        font-size: 16px;
-        border-bottom: 1px solid #f08300;
+    width: 400px;
+    padding-bottom: 8px;
+    // min-height: 200px;
+    background-color: rgba($color: #777, $alpha: 0.5);
+    border-bottom-right-radius: 4px;
+    color: #fff;
+    .gridtable {
+      $borderColor: #fff;
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid $borderColor;
+      th {
+        border-width: 1px;
+        padding: 3px;
+        border-style: solid;
+        border-color: $borderColor;
+      }
+      td {
+        border-width: 1px;
+        padding: 3px;
+        border-style: solid;
+        border-color: $borderColor;
       }
 
-      .text {
+      .active {
+        td {
+          color: #f08300;
+          background-color: paleturquoise;
+        }
+      }
+    }
+
+    .text-message-box {
+      // width: 30%;
+      width: 100%;
+      height: 50px;
+      // border-top-right-radius: 4px;
+      overflow: auto;
+      padding-bottom: 4px;
+
+      transition: height 0.3s linear;
+      .scroll {
         margin-left: 4px;
-        font-size: 12px;
       }
-
-      .active-status {
-        position: absolute;
-        left: 5px;
-        font-size: 18px;
-        animation: move 1s infinite;
+      .message {
+        text-align: left;
+        color: #fff;
+        font-size: 12px;
+        // margin-left: 4px;
+        margin-top: 4px;
+        line-height: 16px;
+      }
+    }
+    &.show-more {
+      .text-message-box {
+        height: 300px;
       }
     }
   }
 
-  .text-message-box {
-    width: 30%;
-    height: 30%;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    background-color: rgba($color: #777, $alpha: 0.5);
-    border-top-right-radius: 4px;
-    overflow: auto;
-    padding-bottom: 4px;
-    .scroll {
-      margin-left: 4px;
-    }
-    .message {
-      text-align: left;
-      color: #fff;
-      font-size: 12px;
-      // margin-left: 4px;
-      margin-top: 4px;
-      line-height: 16px;
+  @media (max-width: 500px) {
+    .player-status {
+      width: 70%;
     }
   }
 
@@ -242,11 +272,6 @@ export default defineComponent({
     position: absolute;
     right: 10px;
     top: 10px;
-    // transform-style: preserve-3d;
-    // perspective: 800px;
-    // $unit: 50px;
-    // width: 15px;
-    // height: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -255,7 +280,6 @@ export default defineComponent({
       height: 50px;
       border-radius: 50%;
       background-size: 100% 100%;
-      // animation: rotation 3s infinite linear;
     }
     .work {
       background-image: url('~@/assets/image/work.png');

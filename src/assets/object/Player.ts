@@ -4,6 +4,7 @@ import { createAnimation, getAngle } from '@/assets/index'
 import TWEEN from '@tweenjs/tween.js'
 import { THREE } from '@/assets/three/lib'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { bus, ACTION } from '@/assets/bus'
 export interface PlayerOptions {
   player: PersonType
@@ -64,8 +65,6 @@ export default class Player {
             this.material.color = new THREE.Color(color)
           }
           object.material = this.material
-          // object.material = object.material.clone()
-          // object.material.color = new THREE.Color(color)
         }
       }
     })
@@ -307,4 +306,20 @@ export default class Player {
     }
     bus.off(ACTION.RENDER, this.render)
   }
+}
+
+function loadFbx(path: string) {
+  const loader = new FBXLoader()
+  return new Promise((resolve, reject) => {
+    loader.load(
+      path,
+      object => {
+        resolve(object)
+      },
+      undefined,
+      err => {
+        reject(err)
+      },
+    )
+  })
 }
