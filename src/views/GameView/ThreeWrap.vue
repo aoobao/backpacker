@@ -117,8 +117,11 @@ export default defineComponent({
       // env.control?.moveTo(0, 0, -700, true)
 
       // test
-      const axesHelper = new THREE.AxesHelper(500)
-      env.scene.add(axesHelper)
+      console.log(process.env)
+      if (process.env.VUE_APP_ENV === 'development') {
+        const axesHelper = new THREE.AxesHelper(500)
+        env.scene.add(axesHelper)
+      }
 
       tick = requestAnimationFrame(animate)
 

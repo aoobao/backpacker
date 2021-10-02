@@ -124,6 +124,16 @@ export default defineComponent({
       return player
     }
 
+    const setActiveByPlayerId = (playerId: number) => {
+      players.forEach(p => {
+        if (p.player.id === playerId) {
+          p.setActive(true)
+        } else {
+          p.setActive(false)
+        }
+      })
+    }
+
     const gameLoop = async () => {
       const env = store.env
       if (!env) throw new Error('未获取3d环境')
@@ -135,6 +145,8 @@ export default defineComponent({
 
       const player = getPlayerById(store.gameState.currentPlayerId)
 
+      setActiveByPlayerId(store.gameState.currentPlayerId)
+
       // 切换地图
       if (player.player.map !== store.gameState.activeMap) {
         // await toggleMap(player.player.map)
@@ -143,7 +155,7 @@ export default defineComponent({
       }
 
       // 聚焦当前玩家
-      // workMap.value!.lookAtPosition(player!.instance.position)
+      workMap.value!.lookAtPosition(player!.instance.position)
 
       if (!player.player.isAI) enabled.value = true
 
@@ -375,7 +387,6 @@ export default defineComponent({
       const hotCity = travelMap.value!.getPointValue(index)
 
       if (hotCity !== null) {
-
         appendMessage(`路过热门城市${hotCity.address.options.name},增加${hotCity.point}点积分`, player.player)
 
         await travelMap.value!.removeHotCity(hotCity)

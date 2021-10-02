@@ -79,6 +79,13 @@ export function confirm(text: string, title = '提示'): Promise<boolean> {
   })
 }
 
+export function randItemInList<T>(list: Array<T>): T {
+  if (list.length === 0) throw new Error('数组长度为0')
+  const max = list.length - 1
+  const index = randBetween(0, max)
+  return list[index]
+}
+
 export function randBetween(min: number, max: number) {
   const num = Math.floor((max - min + 1) * Math.random())
 

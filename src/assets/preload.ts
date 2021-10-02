@@ -1,10 +1,12 @@
 // 预加载文件
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { THREE } from './three/lib'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 
 export const enum FILE_TYPE {
   IMAGE = 0,
   GLTF = 1,
+  FBX = 2,
 }
 
 export interface FileItem {
@@ -19,6 +21,11 @@ export const FILE_LIST: Array<FileItem> = [
     id: 'player',
     path: './object/RobotExpressive.glb',
     type: FILE_TYPE.GLTF,
+  },
+  {
+    id: 'arrow',
+    path: './object/arrow/Arrow.fbx',
+    type: FILE_TYPE.FBX,
   },
   {
     id: 'logo',
@@ -368,9 +375,27 @@ function loadFile(file: FileItem) {
       return loadImage(file)
     case FILE_TYPE.GLTF:
       return loadGltf(file)
+    case FILE_TYPE.FBX:
+      return loadFbx(file)
     default:
       return Promise.reject(new Error('错误的文件类型:' + file.type))
   }
+}
+
+function loadFbx(file: FileItem) {
+  return new Promise<THREE.Group>((resolve, reject) => {
+    const loader = new FBXLoader()
+    loader.load(
+      file.path,
+      object => {
+        resolve(object)
+      },
+      undefined,
+      err => {
+        reject(err)
+      },
+    )
+  })
 }
 
 function loadGltf(file: FileItem) {

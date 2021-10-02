@@ -1,7 +1,7 @@
 import { GameState, MapAddress, PersonType, PointType, ThreeEnvironment } from '@/assets/types'
 import { reactive, computed } from 'vue'
 import { defalutPerson, workMapList, travelMapList, getOutOrderTravelMapList } from '@/assets/setting'
-import { randBetween } from '@/assets/index'
+import { randItemInList } from '@/assets/index'
 import { SETTING } from '@/config'
 import PhysicsWorld from '@/assets/physics'
 import Player from '@/assets/object/Player'
@@ -61,8 +61,17 @@ export function GameStateStore() {
     const hostList6 = addressList.splice(0, 6)
 
     gameState.hotCitys = [hotList8, hotList7, hostList6, addressList]
+
+    const playerIds = players.filter(t => !t.isAI).map(t => t.id)
+    if (playerIds.length === 0) {
+      // 如果全部都是机器人,随机选一个
+      const ids = players.map(t => t.id)
+      gameState.currentPlayerId = randItemInList(ids)
+    } else {
+      gameState.currentPlayerId = randItemInList(playerIds)
+    }
+
     // console.log(gameState.hotCitys)
-    gameState.currentPlayerId = randBetween(1, 4)
     // gameState.currentPlayerId = 4
     env = undefined
   }

@@ -4,8 +4,11 @@ import { createAnimation, getAngle } from '@/assets/index'
 import TWEEN from '@tweenjs/tween.js'
 import { THREE } from '@/assets/three/lib'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
+import { getFile } from '@/assets/preload'
+// import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { bus, ACTION } from '@/assets/bus'
+
+const ARROW_POSITION_Y = 11
 export interface PlayerOptions {
   player: PersonType
   gltf: GLTF
@@ -32,15 +35,34 @@ export default class Player {
   actions: Array<ActionType> = []
   gltf: GLTF
   material: any
+  isActive: boolean
 
   previousAction?: THREE.AnimationAction
   activeAction?: THREE.AnimationAction
+
+  arrow: THREE.Group
 
   // store = useInjector(GameStateStore)
   constructor(opts: PlayerOptions) {
     this.render = this.render.bind(this)
     this.gltf = opts.gltf
     this.instance = opts.gltf.scene.clone()
+
+    const arrow = getFile('arrow').clone() as THREE.Group
+    arrow.scale.set(5, -5, 5)
+    arrow.position.y = ARROW_POSITION_Y
+    arrow.visible = false
+
+    this.arrow = arrow
+    this.isActive = false
+
+    // arrow.position.z = 100
+
+    this.instance.add(arrow)
+
+    // console.log(arrow)
+    // debugger
+
     this.mixer = new THREE.AnimationMixer(this.instance)
     const scaleNumber = 4
     this.instance.scale.set(scaleNumber, scaleNumber, scaleNumber)
@@ -127,6 +149,16 @@ export default class Player {
       if (emotes.indexOf(clip.name) >= 0 || states.indexOf(clip.name) >= 4) {
         action.clampWhenFinished = true
         action.loop = THREE.LoopOnce
+      }
+    }
+  }
+
+  setActive(active: boolean) {
+    if (this.isActive !== active) {
+      this.isActive = active
+      // this.arrow.visible = active
+      if (!active) {
+        this.arrow.visible = active
       }
     }
   }
@@ -274,8 +306,22 @@ export default class Player {
 
   private render(e: any) {
     const delta = e.delta as number
-
     this.mixer.update(delta)
+
+    if (this.isActive) {
+      const cycleTime = 1000
+      const MIN_POSITION_Y = 9.5
+      const timer = e.timer as number
+      const t = timer % cycleTime // [0,1000)
+      //  x [-1,1)
+      const x = (t - cycleTime / 2) / (cycleTime / 2)
+      // 1 - pow(abs(x),1)
+      const deltaY = (1 - Math.abs(x)) * (MIN_POSITION_Y - ARROW_POSITION_Y)
+
+      this.arrow.position.y = ARROW_POSITION_Y + deltaY
+
+      this.arrow.visible = true
+    }
   }
 
   getOffset(address: MapAddress): Offset {
@@ -306,20 +352,4 @@ export default class Player {
     }
     bus.off(ACTION.RENDER, this.render)
   }
-}
-
-function loadFbx(path: string) {
-  const loader = new FBXLoader()
-  return new Promise((resolve, reject) => {
-    loader.load(
-      path,
-      object => {
-        resolve(object)
-      },
-      undefined,
-      err => {
-        reject(err)
-      },
-    )
-  })
 }

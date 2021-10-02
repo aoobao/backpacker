@@ -59,7 +59,7 @@ export default defineComponent({
     const message = ref<HTMLElement>()
     const scroll = ref<HTMLElement>()
 
-    const showMore = ref(true)
+    const showMore = ref(false)
 
     const toggleShowMore = () => {
       showMore.value = !showMore.value
