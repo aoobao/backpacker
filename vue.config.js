@@ -5,7 +5,7 @@ function resolve(dir) {
 }
 
 module.exports = {
-  publicPath: '/docs/',
+  publicPath: '/backpacker/',
   outputDir: 'docs',
   productionSourceMap: false,
   css: {
