@@ -5,6 +5,8 @@ function resolve(dir) {
 }
 
 module.exports = {
+  outputDir: 'docs',
+  productionSourceMap: false,
   css: {
     requireModuleExtension: true,
     loaderOptions: {
