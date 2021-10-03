@@ -12,6 +12,10 @@ yarn build  // build
 
 [https://j9981168.pixnet.net/blog/post/239327645](https://j9981168.pixnet.net/blog/post/239327645)
 
+## 游戏地址
+
+[https://aoobao.github.io/backpacker/](https://aoobao.github.io/backpacker/)
+
 ## TODO list
 
 - [x] 当前行动中角色头部标记
