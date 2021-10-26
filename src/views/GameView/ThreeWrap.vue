@@ -33,8 +33,8 @@ export default defineComponent({
 
       // const aspect = window.innerWidth / window.innerHeight
       // env.camera = new THREE.OrthographicCamera((frustumSize * aspect) / -2, (frustumSize * aspect) / 2, frustumSize / 2, frustumSize / -2, 1, 1000)
-
-      env.camera.position.set(0, 0, 200)
+      // -183.24351447782382,-203.67707488871974,117.73896367214361
+      // env.camera.position.set(183, -203, 117)
       env.camera.up.set(0, 0, 1)
 
       env.control = new CameraControls(env.camera!, env.renderer!.domElement)
@@ -47,14 +47,24 @@ export default defineComponent({
       env.control.touches.two = CameraControls.ACTION.TOUCH_ZOOM
       env.control.touches.three = CameraControls.ACTION.TOUCH_ZOOM_TRUCK
 
-      env.control.dollySpeed = 0.8
-      env.control.minPolarAngle = (0 * Math.PI) / 180
-      env.control.maxPolarAngle = (70 * Math.PI) / 180
+      // env.control.dollySpeed = 0.8
+      // const polarAngle = 45
+      // env.control.rotatePolarTo((polarAngle * Math.PI) / 180, false)
+
+      // env.control.minPolarAngle = (polarAngle * Math.PI) / 180
+      // env.control.maxPolarAngle = (polarAngle * Math.PI) / 180
 
       // env.control.minAzimuthAngle = (-50 * Math.PI) / 180
       // env.control.maxAzimuthAngle = (50 * Math.PI) / 180
 
-      // env.control.setLookAt(0, -245, 170, 0, 0, 0, true)
+      env.control.setLookAt(0, -245, 170, 0, 0, 0, false)
+
+      if (process.env.VUE_APP_ENV === 'production') {
+        env.control.minPolarAngle = env.control.polarAngle
+        env.control.maxPolarAngle = env.control.polarAngle
+      }
+
+      // console.log(env.control.polarAngle)
 
       // env.control.rotateTo(0, env.control.polarAngle, false)
 
@@ -154,7 +164,6 @@ export default defineComponent({
           }
           env.renderer?.render(env.scene, camera)
         }
-        // tick = requestAnimationFrame(render)
       }
     })
 

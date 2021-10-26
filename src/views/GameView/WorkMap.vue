@@ -9,6 +9,8 @@ import { createAnimation } from '@/assets'
 // import { workMapList } from '@/assets/setting'
 import { createType0Canvas, createWorkCanvas, createRewardCanvas } from '@/assets/canvas-background'
 import { MapAddress, PointType } from '@/assets/types'
+import { SETTING } from '@/config'
+
 // import { useStore } from 'vuex'
 
 export default defineComponent({
@@ -47,7 +49,7 @@ export default defineComponent({
 
       if (val === 0) {
         map.visible = true
-        const target = { z: -30 }
+        const target = { z: SETTING.positionZ }
         const t = Math.abs(map.position.z + target.z)
 
         // console.log(t)
@@ -56,7 +58,7 @@ export default defineComponent({
           tween = null
         })
       } else {
-        const target = { z: -1000 }
+        const target = { z: SETTING.positionZ2 }
         const t = Math.abs(target.z + map.position.z)
         tween = createAnimation(map.position, target, t, TWEEN.Easing.Linear.None)
         tween.onComplete(() => {

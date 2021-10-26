@@ -106,7 +106,7 @@ export default defineComponent({
 
       initMapStar()
 
-      env.control!.setLookAt(0, -245, 170, 0, 0, 0, true)
+      // env.control!.setLookAt(0, -245, 170, 0, 0, 0, true)
 
       // 开场动画
       delay(1).then(() => {
@@ -155,7 +155,7 @@ export default defineComponent({
       }
 
       // 聚焦当前玩家
-      workMap.value!.lookAtPosition(player!.instance.position)
+      // workMap.value!.lookAtPosition(player!.instance.position)
 
       if (!player.player.isAI) enabled.value = true
 
@@ -475,6 +475,10 @@ export default defineComponent({
 .container {
   width: 100%;
   height: 100%;
+  background-image: url('~@/assets/image/bg-play.jpg');
+  // background-size: 100% 100%;
+  background-position: center center;
+  background-size: cover;
 
   .btns {
     position: absolute;

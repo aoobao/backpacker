@@ -2602,10 +2602,10 @@ camelcase@^6.0.0:
   resolved "https://registry.npm.taobao.org/camelcase/download/camelcase-6.2.0.tgz#924af881c9d525ac9d87f40d964e5cea982a1809"
   integrity sha1-kkr4gcnVJaydh/QNlk5c6pgqGAk=
 
-camera-controls@^1.29.1:
-  version "1.29.1"
-  resolved "https://registry.yarnpkg.com/camera-controls/-/camera-controls-1.29.1.tgz#9b442932831e33d71f004abb36fa4623c32dfdbd"
-  integrity sha512-G+HtYqoyTykpMPYVP1SMBtH3XCTxW47w2BF1gG1fs077cHpzcpeFxecCAjiMy25wPmG91q/Sypq1NufGHCd+ug==
+camera-controls@^1.33.1:
+  version "1.33.1"
+  resolved "https://registry.yarnpkg.com/camera-controls/-/camera-controls-1.33.1.tgz#0f4815919f04da6b0427f530566dfe6ea17f4568"
+  integrity sha512-+l0LgV+w0G4GAtwiSahHLj7rCqzVMSa+/BHE3+aE7vdku2B9QF8CXgDSlCH9cBt2TZeg+WQSkRPeIYwjvtjdPw==
 
 caniuse-api@^3.0.0:
   version "3.0.0"

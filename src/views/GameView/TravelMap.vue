@@ -13,8 +13,7 @@ import { createAnimation } from '@/assets'
 import { HotCity, MapAddress, PointType } from '@/assets/types'
 import { createBigCityCanvas, createCityCanvas, createStartPointCanvas } from '@/assets/canvas-background'
 import PointSelect from '@/assets/three/PointSelect/index'
-
-
+import { SETTING } from '@/config'
 
 export default defineComponent({
   name: 'TravelMap',
@@ -163,7 +162,7 @@ export default defineComponent({
       // console.log('travel map ' + val)
       if (val === 1) {
         map.visible = true
-        const target = { z: -30 }
+        const target = { z: SETTING.positionZ }
         const t = Math.abs(map.position.z + target.z)
 
         tween = createAnimation(map.position, target, t, TWEEN.Easing.Linear.None)
@@ -171,7 +170,7 @@ export default defineComponent({
           tween = null
         })
       } else {
-        const target = { z: -1000 }
+        const target = { z: SETTING.positionZ2 }
 
         const t = Math.abs(target.z + map.position.z)
 
