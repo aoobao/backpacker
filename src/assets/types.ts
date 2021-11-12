@@ -1,5 +1,6 @@
 import { THREE, CameraControls } from '@/assets/three/lib'
-
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 export interface PersonType {
   id: number
   name: string
@@ -77,6 +78,7 @@ export interface ThreeEnvironment {
   camera?: THREE.PerspectiveCamera
   // camera?: THREE.OrthographicCamera
   control?: CameraControls
+  composer?: EffectComposer
 }
 
 export interface RectType {

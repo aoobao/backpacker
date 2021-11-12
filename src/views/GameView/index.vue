@@ -229,6 +229,8 @@ export default defineComponent({
       if (isTravel) {
         value += cube2.getValue()
       }
+      // just test
+      // let value = 1
 
       // const value = 5
       // 显示骰子点数在屏幕上
@@ -418,7 +420,7 @@ export default defineComponent({
       return addLevel(address)
     }
 
-    // 增加熟练度
+    // 对打工地点增加熟练度
     async function addLevel(address: MapAddress) {
       let level = address.options.level || 0
       const player = players.find(t => t.player.id === address.options.playerId)
@@ -427,14 +429,30 @@ export default defineComponent({
 
         return false
       } else {
-        level++
+        level += 1
         address.options.level = level
         // const cost = address.options.reward![level]
         appendMessage(`路过${address.options.name},熟练度增加:${level}级`, player!.player)
         // 增加星星动画
-        await workMap.value?.addStar(address)
+        await workMap.value?.addStar(address, level)
+        // await delay(3)
+        // level++
+        // address.options.level = level
+        // await workMap.value?.addStar(address, level)
+        // await delay(3)
+        // level++
+        // address.options.level = level
+        // await workMap.value?.addStar(address, level)
         return true
       }
+    }
+
+    function delay(num: number): Promise<void> {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve()
+        }, num * 1000)
+      })
     }
 
     const initMapStar = () => {
@@ -443,10 +461,14 @@ export default defineComponent({
           const level = w.options.level!
 
           if (level > 0) {
-            for (let i = 1; i <= level; i++) {
-              workMap.value?.addStar(w, i)
-            }
+            workMap.value?.addStar(w, level)
           }
+
+          // if (level > 0) {
+          //   for (let i = 1; i <= level; i++) {
+          //     workMap.value?.addStar(w, i)
+          //   }
+          // }
         }
       })
     }

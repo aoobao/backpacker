@@ -7,6 +7,7 @@ export const enum FILE_TYPE {
   IMAGE = 0,
   GLTF = 1,
   FBX = 2,
+  FONT = 3,
 }
 
 export interface FileItem {
@@ -17,6 +18,11 @@ export interface FileItem {
 }
 
 export const FILE_LIST: Array<FileItem> = [
+  {
+    id: 'font',
+    path: './font/helvetiker_regular.typeface.json',
+    type: FILE_TYPE.FONT,
+  },
   {
     id: 'player',
     path: './object/RobotExpressive.glb',
@@ -377,9 +383,27 @@ function loadFile(file: FileItem) {
       return loadGltf(file)
     case FILE_TYPE.FBX:
       return loadFbx(file)
+    case FILE_TYPE.FONT:
+      return loadFont(file)
     default:
       return Promise.reject(new Error('错误的文件类型:' + file.type))
   }
+}
+
+function loadFont(file: FileItem) {
+  return new Promise<THREE.Font>((resolve, reject) => {
+    const loader = new THREE.FontLoader()
+    loader.load(
+      file.path,
+      font => {
+        resolve(font)
+      },
+      undefined,
+      err => {
+        reject(err)
+      },
+    )
+  })
 }
 
 function loadFbx(file: FileItem) {

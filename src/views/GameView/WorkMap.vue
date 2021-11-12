@@ -10,7 +10,8 @@ import { createAnimation } from '@/assets'
 import { createType0Canvas, createWorkCanvas, createRewardCanvas } from '@/assets/canvas-background'
 import { MapAddress, PointType } from '@/assets/types'
 import { SETTING } from '@/config'
-
+import { updateMoneyInWorkAddress } from '@/assets/object/utils'
+import { GirdType, PlaneGird } from '@/assets/object/PlaneGird'
 // import { useStore } from 'vuex'
 
 export default defineComponent({
@@ -108,31 +109,55 @@ export default defineComponent({
     }
 
     let workAddressCount = 0
-    // 地图棋盘格子
-    store.gameState.workMapList.forEach(async m => {
-      const geometry = new THREE.PlaneGeometry(m.width, m.height)
-      const material = await createMaterial(m)
-      // 发薪日
 
-      const mesh = new THREE.Mesh(geometry, material)
-
-      mesh.name = `work-${m.index}`
-
-      mesh.position.set(m.position[0], m.position[1], m.position[2])
-
-      if (m.type !== PointType.START && m.options?.rotation) {
-        mesh.rotation.z = m.options.rotation
-      }
-
-      map.add(mesh)
+    const loadInit = () => {
       workAddressCount++
-
       if (workAddressCount === store.gameState.workMapList.length) {
         if (isLoad.value) {
           emit('over')
         }
       }
+    }
+
+    // 地图棋盘格子
+    const workPlaneGirdList = store.gameState.workMapList.map(m => {
+      return new PlaneGird({
+        mapAddress: m,
+        createMaterialFun: createMaterial,
+        type: GirdType.Work,
+        map,
+        init: loadInit,
+      })
     })
+
+    // store.gameState.workMapList.forEach(async m => {
+    //   const geometry = new THREE.PlaneGeometry(m.width, m.height)
+    //   const material = await createMaterial(m)
+    //   // 发薪日
+
+    //   const mesh = new THREE.Mesh(geometry, material)
+
+    //   mesh.name = `work-${m.index}`
+
+    //   mesh.position.set(m.position[0], m.position[1], m.position[2])
+
+    //   if (m.type !== PointType.START && m.options?.rotation) {
+    //     mesh.rotation.z = m.options.rotation
+    //   }
+
+    //   if (m.type === PointType.WORK) {
+    //     updateMoneyInWorkAddress(mesh, m)
+    //   }
+
+    //   map.add(mesh)
+    //   workAddressCount++
+
+    //   if (workAddressCount === store.gameState.workMapList.length) {
+    //     if (isLoad.value) {
+    //       emit('over')
+    //     }
+    //   }
+    // })
 
     const init = () => {
       const env = store.env
@@ -176,40 +201,41 @@ export default defineComponent({
       mapMaterial.dispose()
     })
 
-    function addStar(address: MapAddress, level?: number): Promise<boolean> {
-      const star = createStar()
+    function addStar(address: MapAddress, level: number): Promise<boolean> {
       const addressName = `work-${address.index}`
-      const count = level ? level : address.options.level || 1
+      const pg = workPlaneGirdList.find(t => t.name === addressName)
 
-      const scale = {
-        x: 0.15,
-        y: 0.15,
-        // z: 0.15,
-      }
-      // star.scale.x = scale.x
-      // star.scale.y = scale.y
+      pg?.addStar(level)
 
-      // star.scale.set(scale.x, scale.y, scale.z)
-      const x = address.width * 0.3 * count - address.width * 0.6
-      const y = address.height * 0.6
-      star.position.set(x, y, 0.2)
-      const addressMesh = map.children.find(t => t.name === addressName)
+      return Promise.resolve(true)
 
-      if (!addressMesh) throw new Error('未找到打工地点:' + addressName)
+      // const star = createStar()
+      // const addressName = `work-${address.index}`
+      // const count = level ? level : address.options.level || 1
 
-      addressMesh.add(star)
+      // const scale = {
+      //   x: 0.15,
+      //   y: 0.15,
+      // }
+      // const x = address.width * 0.3 * count - address.width * 0.6
+      // const y = address.height * 0.6
+      // star.position.set(x, y, 0.2)
+      // const addressMesh = map.children.find(t => t.name === addressName)
 
-      // const tween =
-      // createAnimation(star.position, { z: 2 }, 2000, TWEEN.Easing.Linear.None)
+      // if (!addressMesh) throw new Error('未找到打工地点:' + addressName)
 
-      const tween = createAnimation(star.scale, scale, 1500, TWEEN.Easing.Quartic.In)
+      // addressMesh.add(star)
 
-      return new Promise(resolve => {
-        // resolve(true)
-        tween.onComplete(() => {
-          resolve(true)
-        })
-      })
+      // updateMoneyInWorkAddress(addressMesh, address)
+
+      // const tween = createAnimation(star.scale, scale, 1500, TWEEN.Easing.Quartic.In)
+
+      // return new Promise(resolve => {
+      //   // resolve(true)
+      //   tween.onComplete(() => {
+      //     resolve(true)
+      //   })
+      // })
     }
 
     function lookAtPosition(point: THREE.Vector3): void {

@@ -10,11 +10,13 @@ import TWEEN from '@tweenjs/tween.js'
 import { createThreeEnvironment, ThreeEnvironment } from '@/assets/types'
 import { defineComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { bus, ACTION } from '@/assets/bus'
-import { THREE, CameraControls } from '@/assets/three/lib'
+import { THREE } from '@/assets/three/lib'
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import Stats from 'stats.js'
 import PhysicsWorld from '@/assets/physics'
+import { initCameraAndControls, initEffectComposer } from '@/assets/three/init'
+
 // import CANNON from 'cannon'
 // import { cameraJSON } from '@/assets/object.json'
 export default defineComponent({
@@ -26,50 +28,8 @@ export default defineComponent({
 
     let tick = 0
     let env: ThreeEnvironment
+    let stats: Stats
     // const frustumSize = 300
-
-    const initCameraAndControls = () => {
-      env.camera = new THREE.PerspectiveCamera(60, env.width / env.height, 0.1, 1000)
-
-      // const aspect = window.innerWidth / window.innerHeight
-      // env.camera = new THREE.OrthographicCamera((frustumSize * aspect) / -2, (frustumSize * aspect) / 2, frustumSize / 2, frustumSize / -2, 1, 1000)
-      // -183.24351447782382,-203.67707488871974,117.73896367214361
-      // env.camera.position.set(183, -203, 117)
-      env.camera.up.set(0, 0, 1)
-
-      env.control = new CameraControls(env.camera!, env.renderer!.domElement)
-
-      env.control.maxDistance = 700
-
-      env.control.mouseButtons.wheel = CameraControls.ACTION.ZOOM
-      env.control.mouseButtons.right = CameraControls.ACTION.NONE
-
-      env.control.touches.two = CameraControls.ACTION.TOUCH_ZOOM
-      env.control.touches.three = CameraControls.ACTION.TOUCH_ZOOM_TRUCK
-
-      // env.control.dollySpeed = 0.8
-      // const polarAngle = 45
-      // env.control.rotatePolarTo((polarAngle * Math.PI) / 180, false)
-
-      // env.control.minPolarAngle = (polarAngle * Math.PI) / 180
-      // env.control.maxPolarAngle = (polarAngle * Math.PI) / 180
-
-      // env.control.minAzimuthAngle = (-50 * Math.PI) / 180
-      // env.control.maxAzimuthAngle = (50 * Math.PI) / 180
-
-      env.control.setLookAt(0, -245, 170, 0, 0, 0, false)
-
-      if (process.env.VUE_APP_ENV === 'production') {
-        env.control.minPolarAngle = env.control.polarAngle
-        env.control.maxPolarAngle = env.control.polarAngle
-      }
-
-      // console.log(env.control.polarAngle)
-
-      // env.control.rotateTo(0, env.control.polarAngle, false)
-
-      // console.log(env.control.azimuthAngle)
-    }
 
     const initLight = () => {
       // 环境光
@@ -105,6 +65,7 @@ export default defineComponent({
       }
 
       env.renderer.setSize(env.width, env.height)
+      env.composer && env.composer.setSize(env.width, env.height)
 
       console.log('resize')
     }
@@ -115,7 +76,12 @@ export default defineComponent({
         alpha: true,
       })
 
-      initCameraAndControls()
+      // 初始化相机和轨道控制器
+      initCameraAndControls(env)
+
+      // 初始化后处理
+      initEffectComposer(env)
+
       initLight()
       initPhysicsWorld()
 
@@ -127,22 +93,21 @@ export default defineComponent({
       // env.control?.moveTo(0, 0, -700, true)
 
       // test
-      console.log(process.env)
       if (process.env.VUE_APP_ENV === 'development') {
         const axesHelper = new THREE.AxesHelper(500)
         env.scene.add(axesHelper)
+
+        stats = new Stats()
+        stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild(stats.dom)
       }
 
       tick = requestAnimationFrame(animate)
 
-      // const stats = new Stats()
-      // stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
-      // document.body.appendChild(stats.dom)
-
       function animate(timer: number) {
-        // stats.begin()
+        stats && stats.begin()
         render(timer)
-        // stats.end()
+        stats && stats.end()
         tick = requestAnimationFrame(animate)
       }
 
@@ -162,7 +127,12 @@ export default defineComponent({
 
             // console.log(`${camera.position.x},${camera.position.y},${camera.position.z}`)
           }
-          env.renderer?.render(env.scene, camera)
+
+          if (env.composer) {
+            env.composer.render(delta)
+          } else {
+            env.renderer?.render(env.scene, camera)
+          }
         }
       }
     })
