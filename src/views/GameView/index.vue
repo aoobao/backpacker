@@ -422,19 +422,19 @@ export default defineComponent({
 
     // 对打工地点增加熟练度
     async function addLevel(address: MapAddress) {
-      let level = address.options.level || 0
+      let level: 0 | 1 | 2 | 3 = address.options.level || 0
       const player = players.find(t => t.player.id === address.options.playerId)
       if (level === 3) {
         showMessage(`${player!.player.name}的${address.options.name}已经达到最高等级`, 2000)
 
         return false
       } else {
-        level += 1
+        level = level + 1 as 1 | 2 | 3
         address.options.level = level
         // const cost = address.options.reward![level]
         appendMessage(`路过${address.options.name},熟练度增加:${level}级`, player!.player)
         // 增加星星动画
-        await workMap.value?.addStar(address, level)
+        await workMap.value!.addStar(address, level)
         // await delay(3)
         // level++
         // address.options.level = level
@@ -460,7 +460,7 @@ export default defineComponent({
         if (w.type === PointType.WORK) {
           const level = w.options.level!
 
-          if (level > 0) {
+          if (level) {
             workMap.value?.addStar(w, level)
           }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
-import { defineComponent, ref, onBeforeMount, onMounted, watch, watchEffect } from 'vue'
+import { defineComponent, ref, onBeforeUnmount, onMounted, watch, watchEffect } from 'vue'
 import { THREE } from '@/assets/three/lib'
 import { createStar } from '@/assets/index'
 import TWEEN, { Tween } from '@tweenjs/tween.js'
@@ -193,19 +193,23 @@ export default defineComponent({
       init()
     })
 
-    onBeforeMount(() => {
+    onBeforeUnmount(() => {
       // const env = store?.gameState.env
       const env = store?.env
+
+      // workPlaneGirdList.forEach(t => {
+      //   t.destroy()
+      // })
       env?.scene.remove(map)
       mapGeometry.dispose()
       mapMaterial.dispose()
     })
 
-    function addStar(address: MapAddress, level: number): Promise<boolean> {
+    function addStar(address: MapAddress, level: 1 | 2 | 3): Promise<boolean> {
       const addressName = `work-${address.index}`
-      const pg = workPlaneGirdList.find(t => t.name === addressName)
+      const pg = workPlaneGirdList.find(t => t.name === addressName)!
 
-      pg?.addStar(level)
+      pg.addStar(level)
 
       return Promise.resolve(true)
 

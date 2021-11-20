@@ -40,40 +40,35 @@ const travellingParticlesFragmentShader = `
 varying float vOpacity;
 uniform vec3 uColor;
 
-float invert(float n){
-    return 1. - n;
-}
-
 void main(){
-  //vec2 uv=vec2(gl_PointCoord.x,invert(gl_PointCoord.y));
-  //vec2 cUv=2.*uv-1.;
   vec4 color=vec4(uColor * uColor,vOpacity);
-
   gl_FragColor=color;
 }
 `
 
 const SPEED = 240
 const MAX_POINT_COUNT = 80
+const DISTANCE = 0.5
 
 // 棋盘上的格子
 export class PlaneGird {
   public mesh?: THREE.Mesh
-  public readonly name: string
+  public name!: string
   public m: MapAddress
   public map: THREE.Object3D
   public line?: Line
   private positions?: Float32Array
   private opacitys?: Float32Array
   private geometry?: THREE.BufferGeometry
+  private type: GirdType
 
   private material?: THREE.ShaderMaterial
   constructor(opt: PlaneGirdOptions) {
     this.render = this.render.bind(this)
     const m = opt.mapAddress
-    this.name = `work-${m.index}`
     this.m = m
     this.map = opt.map
+    this.type = opt.type
 
     const func = opt.type === GirdType.Work ? this.initWork : this.initTravel
 
@@ -85,11 +80,26 @@ export class PlaneGird {
   }
 
   async initTravel(createMaterialFun: (m: MapAddress) => Promise<THREE.Material>): Promise<void> {
-    // TODO
+    const m = this.m
+    this.name = `travel-${m.index}`
+    const geometry = new THREE.PlaneGeometry(m.width, m.height)
+    const material = await createMaterialFun(m)
+
+    const mesh = new THREE.Mesh(geometry, material)
+    this.mesh = mesh
+    mesh.name = this.name
+    mesh.position.set(...m.position)
+
+    if (m.options.rotation) {
+      mesh.rotation.z = m.options.rotation
+    }
+
+    this.map.add(mesh)
   }
 
   async initWork(createMaterialFun: (m: MapAddress) => Promise<THREE.Material>): Promise<void> {
     const m = this.m
+    this.name = `work-${m.index}`
     const geometry = new THREE.PlaneGeometry(m.width, m.height)
     const material = await createMaterialFun(m)
 
@@ -120,7 +130,7 @@ export class PlaneGird {
     //   [width / 2, height / 2],
     //   [-width / 2, height / 2],
     // ]
-    const dis = 0.5
+    const dis = DISTANCE
     const p1 = createPoints([-width / 2, -height / 2], [width / 2, -height / 2], dis) // 底边
     const p2 = createPoints([width / 2, -height / 2], [width / 2, height / 2], dis) // 右边
     const p3 = createPoints([width / 2, height / 2], [-width / 2, height / 2], dis) // 上边
@@ -138,85 +148,83 @@ export class PlaneGird {
   }
 
   updateMoneyInWorkAddress() {
-    if (this.mesh) {
+    if (this.mesh && this.type === GirdType.Work) {
       updateMoneyInWorkAddress(this.mesh, this.m)
     }
   }
 
-  addStar(level: number) {
-    if (!this.mesh) return
-    const colors = [0x4ec0e9, 0x558b2f, 0xe65100, 0xb71c1c]
+  addStar(level: 0 | 1 | 2 | 3 | 4) {
+    // if (this.type === GirdType.Work) {
+    //   debugger
+    // }
+    if (!this.mesh) {
+      // 因为地图中的图片是异步加载的,所以旅游地图存在还没创建mesh,初始化热门景点的问题,这里延迟100毫秒再继续创建
+      setTimeout(() => {
+        this.addStar(level)
+      }, 100)
+      return
+    }
+    // const colors = [0x4ec0e9, 0x558b2f, 0xe65100, 0xb71c1c]
+    const colors = {
+      1: 0x4ec0e9,
+      2: 0x558b2f,
+      3: 0xe65100,
+      4: 0xb71c1c,
+    }
     this.updateMoneyInWorkAddress()
 
-    if (!this.line) {
-      this.initLine() // 初始化线段
+    if (level !== 0) {
+      if (!this.line) {
+        this.initLine() // 初始化线段
 
-      this.line!.color = colors[level - 1]
-      // const pointCoords = this.line!.points.map(point => [point.x, point.y, point.z]).flat(1)
-      // this.positions = new Float32Array(pointCoords)
-      // this.opacitys = new Float32Array(this.positions.length).map(() => 0.8)
+        this.line!.color = colors[level]
 
-      this.positions = new Float32Array(MAX_POINT_COUNT * 3)
-      this.opacitys = new Float32Array(MAX_POINT_COUNT).map((v, i) => {
-        return (MAX_POINT_COUNT - i) / MAX_POINT_COUNT
-      })
+        this.positions = new Float32Array(MAX_POINT_COUNT * 3)
+        this.opacitys = new Float32Array(MAX_POINT_COUNT).map((v, i) => {
+          return (MAX_POINT_COUNT - i) / MAX_POINT_COUNT
+        })
 
-      const geometry = new THREE.BufferGeometry()
+        const geometry = new THREE.BufferGeometry()
 
-      geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3))
-      geometry.setAttribute('aOpacity', new THREE.BufferAttribute(this.opacitys, 1))
+        geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3))
+        geometry.setAttribute('aOpacity', new THREE.BufferAttribute(this.opacitys, 1))
 
-      this.geometry = geometry
-      // const geo = new THREE.PlaneGeometry(this.m.width, this.m.height)
-      // const positionAttribute = geo.getAttribute('position')
-
-      // const geometry = new THREE.BufferGeometry()
-      // geometry.setAttribute('position', positionAttribute)
-
-      // const material = new THREE.PointsMaterial({ size: 3, color: this.line!.color })
-      this.material = new THREE.ShaderMaterial({
-        vertexShader: travellingParticlesVertexShader,
-        fragmentShader: travellingParticlesFragmentShader,
-        // side: THREE.DoubleSide,
-
-        // transparent: true,
-        // depthTest: true,
-        // depthWrite: true,
-        // blending: THREE.AdditiveBlending,
-        uniforms: {
-          uSize: {
-            value: level * 2 + 1,
+        this.geometry = geometry
+        this.material = new THREE.ShaderMaterial({
+          vertexShader: travellingParticlesVertexShader,
+          fragmentShader: travellingParticlesFragmentShader,
+          uniforms: {
+            uSize: {
+              value: level * 2 + 1,
+            },
+            uColor: {
+              value: new THREE.Color(this.line!.color),
+            },
           },
-          uColor: {
-            value: new THREE.Color(this.line!.color),
-          },
-          // pointTexture: { value: new THREE.TextureLoader().load('./object/disc.png') },
-          // alphaTest: { value: 0.9 },
-        },
-      })
+        })
+        const point = new THREE.Points(geometry, this.material)
+        point.name = 'star-point'
 
-      const point = new THREE.Points(geometry, this.material)
-
-      this.mesh.add(point)
+        this.mesh.add(point)
+      } else {
+        this.line!.color = colors[level]
+        this.material!.uniforms.uSize.value = level * 2 + 1
+        this.material!.uniforms.uColor.value = new THREE.Color(this.line!.color)
+      }
     } else {
-      this.line!.color = colors[level - 1]
-      this.material!.uniforms.uSize.value = level * 2 + 1
-      this.material!.uniforms.uColor.value = new THREE.Color(this.line!.color)
+      // 销毁线段对象
+      this.destroyLine()
     }
   }
 
   render(e: any) {
-    // const timer = e.timer as number
-    const delta = e.delta as number // 0.17
-    // console.log(timer)
     if (!this.line) return
+    const delta = e.delta as number // 0.17
     const line = this.line
     const step = Math.round(delta * SPEED)
     line.currentPos += step
 
     const points = []
-    // const opacitys = []
-
     for (let i = 0; i < MAX_POINT_COUNT; i++) {
       const currentIndex = (line.currentPos + i) % line.points.length
       const point = line.points[currentIndex]
@@ -228,21 +236,28 @@ export class PlaneGird {
     // this.opacitys!.set(opacitys)
 
     this.geometry!.attributes.position.needsUpdate = true
-    // this.geometry!.attributes.aOpacity.needsUpdate = true
-    // let activePoint = 0
-    // for (let i = 0; i < 100; i++) {
-    //   const currentIndex = (line.currentPos + i) % line.points.length
-    //   const point = line.points[currentIndex]
-    //   if (point) {
-    //     const { x, y, z } = point
-    //     this.positions!.set([x, y, z], activePoint * 3)
-    //     this.opacitys!.set([i / (100 * 15)], activePoint)
-    //     activePoint++
-    //   }
-    // }
+  }
+
+  destroyLine() {
+    if (!this.line || !this.mesh) return
+    const point = this.mesh.children.find(p => p.name === 'star-point')
+    if (point) this.mesh.remove(point)
+    this.geometry?.dispose()
+    this.geometry = undefined
+    this.material?.dispose()
+    this.material = undefined
+    this.line = undefined
   }
 
   destroy() {
+    this.destroyLine()
+    if (this.mesh) {
+      const material = this.mesh.material as THREE.Material
+      material.dispose()
+      this.mesh.geometry.dispose()
+      this.mesh = undefined
+    }
+
     bus.off(ACTION.RENDER, this.render)
   }
 }

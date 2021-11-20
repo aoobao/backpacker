@@ -14,6 +14,7 @@ import { HotCity, MapAddress, PointType } from '@/assets/types'
 import { createBigCityCanvas, createCityCanvas, createStartPointCanvas } from '@/assets/canvas-background'
 import PointSelect from '@/assets/three/PointSelect/index'
 import { SETTING } from '@/config'
+import { GirdType, PlaneGird } from '@/assets/object/PlaneGird'
 
 export default defineComponent({
   name: 'TravelMap',
@@ -81,74 +82,114 @@ export default defineComponent({
       return new THREE.MeshBasicMaterial({ color: 0xff0000 })
     }
 
-    store.gameState.travelMapList.forEach(async m => {
-      const geometry = new THREE.PlaneGeometry(m.width, m.height)
-      const material = await createMaterial(m)
-
-      const mesh = new THREE.Mesh(geometry, material)
-      mesh.name = `travel-${m.index}`
-
-      mesh.position.set(...m.position)
-
-      if (m.options.rotation) {
-        mesh.rotation.z = m.options.rotation
-      }
-
-      map.add(mesh)
+    const travelPlaneGirdList = store.gameState.travelMapList.map(m => {
+      return new PlaneGird({
+        mapAddress: m,
+        createMaterialFun: createMaterial,
+        type: GirdType.Travel,
+        map,
+      })
     })
 
-    const star8 = createStar()
-    const star7 = createStar()
-    const star6 = createStar()
-    const star5 = createStar()
+    // store.gameState.travelMapList.forEach(async m => {
+    //   const geometry = new THREE.PlaneGeometry(m.width, m.height)
+    //   const material = await createMaterial(m)
 
-    const initPosition = (star: THREE.Mesh, hot: MapAddress | null, scale: number) => {
-      if (hot === null) {
-        star.parent?.remove(star)
-      } else {
-        const position = hot.position
-        let x = position[0]
-        let y = position[1]
-        const offset = 16
+    //   const mesh = new THREE.Mesh(geometry, material)
+    //   mesh.name = `travel-${m.index}`
 
-        if (Math.abs(x) >= Math.abs(y)) {
-          if (x > 0) {
-            x += offset
-            y += 5
-          } else if (x < 0) {
-            x -= offset
-            y -= 5
-          }
-        } else {
-          if (y > 0) {
-            y += offset
-            x -= 5
-          } else {
-            y -= offset
-            x += 5
-          }
-        }
+    //   mesh.position.set(...m.position)
 
-        star.position.set(x, y, 2)
+    //   if (m.options.rotation) {
+    //     mesh.rotation.z = m.options.rotation
+    //   }
 
-        star.scale.set(scale, scale, scale)
-        if (!star.parent) {
-          map.add(star)
-        }
+    //   map.add(mesh)
+    // })
+
+    // const star8 = createStar()
+    // const star7 = createStar()
+    // const star6 = createStar()
+    // const star5 = createStar()
+
+    // const initPosition = (star: THREE.Mesh, hot: MapAddress | null, scale: number) => {
+    //   if (hot === null) {
+    //     star.parent?.remove(star)
+    //   } else {
+    //     const position = hot.position
+    //     let x = position[0]
+    //     let y = position[1]
+    //     const offset = 16
+
+    //     if (Math.abs(x) >= Math.abs(y)) {
+    //       if (x > 0) {
+    //         x += offset
+    //         y += 5
+    //       } else if (x < 0) {
+    //         x -= offset
+    //         y -= 5
+    //       }
+    //     } else {
+    //       if (y > 0) {
+    //         y += offset
+    //         x -= 5
+    //       } else {
+    //         y -= offset
+    //         x += 5
+    //       }
+    //     }
+
+    //     star.position.set(x, y, 2)
+
+    //     star.scale.set(scale, scale, scale)
+    //     if (!star.parent) {
+    //       map.add(star)
+    //     }
+    //   }
+    // }
+
+    // watchEffect(() => {
+    //   initPosition(star8, store.hot8.value, 0.3)
+    // })
+    // watchEffect(() => {
+    //   initPosition(star7, store.hot7.value, 0.25)
+    // })
+    // watchEffect(() => {
+    //   initPosition(star6, store.hot6.value, 0.2)
+    // })
+    // watchEffect(() => {
+    //   initPosition(star5, store.hot5.value, 0.15)
+    // })
+
+    let star5: PlaneGird | undefined
+    let star6: PlaneGird | undefined
+    let star7: PlaneGird | undefined
+    let star8: PlaneGird | undefined
+
+    const initPosition = (star: PlaneGird | undefined, hot: MapAddress | null, level: 1 | 2 | 3 | 4) => {
+      // 将原先的效果去掉
+      if (star) {
+        star.addStar(0)
+        star = undefined
       }
+      if (!hot) return
+      const name = `travel-${hot.index}`
+      star = travelPlaneGirdList.find(t => t.name === name)!
+      star.addStar(level)
+      // console.log(star, hot, level)
     }
 
     watchEffect(() => {
-      initPosition(star8, store.hot8.value, 0.3)
+      initPosition(star5, store.hot5.value, 1)
     })
     watchEffect(() => {
-      initPosition(star7, store.hot7.value, 0.25)
+      initPosition(star6, store.hot6.value, 2)
     })
     watchEffect(() => {
-      initPosition(star6, store.hot6.value, 0.2)
+      initPosition(star7, store.hot7.value, 3)
     })
     watchEffect(() => {
-      initPosition(star5, store.hot5.value, 0.15)
+      initPosition(star8, store.hot8.value, 4)
     })
 
     let tween: Tween<object> | null
@@ -202,6 +243,11 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       const env = store.env
+
+      travelPlaneGirdList.forEach(t => {
+        t.destroy()
+      })
+
       env?.scene.remove(map)
       mapGeometry.dispose()
       mapMaterial.dispose()
