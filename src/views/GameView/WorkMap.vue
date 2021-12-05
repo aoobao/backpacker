@@ -130,35 +130,6 @@ export default defineComponent({
       })
     })
 
-    // store.gameState.workMapList.forEach(async m => {
-    //   const geometry = new THREE.PlaneGeometry(m.width, m.height)
-    //   const material = await createMaterial(m)
-    //   // 发薪日
-
-    //   const mesh = new THREE.Mesh(geometry, material)
-
-    //   mesh.name = `work-${m.index}`
-
-    //   mesh.position.set(m.position[0], m.position[1], m.position[2])
-
-    //   if (m.type !== PointType.START && m.options?.rotation) {
-    //     mesh.rotation.z = m.options.rotation
-    //   }
-
-    //   if (m.type === PointType.WORK) {
-    //     updateMoneyInWorkAddress(mesh, m)
-    //   }
-
-    //   map.add(mesh)
-    //   workAddressCount++
-
-    //   if (workAddressCount === store.gameState.workMapList.length) {
-    //     if (isLoad.value) {
-    //       emit('over')
-    //     }
-    //   }
-    // })
-
     const init = () => {
       const env = store.env
 
@@ -175,18 +146,6 @@ export default defineComponent({
       if (workAddressCount === store.gameState.workMapList.length) {
         emit('over')
       }
-
-      // setTimeout(() => {
-      //   emit('over')
-      // }, 100)
-
-      // const tween = createAnimation(map.rotation, { z: 0 }, 1000)
-
-      // tween.onComplete(() => {
-      //   store?.setMap1(map)
-      //   isLoad.value = true
-      //   emit('over')
-      // })
     }
 
     onMounted(() => {
@@ -252,18 +211,7 @@ export default defineComponent({
         const azimuthVec = new THREE.Vector2(point.y, point.x)
 
         // console.log(azimuthVec.angle())
-        let redian = -azimuthVec.angle()
-        // console.log(redian, Math.PI, control.azimuthAngle)
-        // redian = -redian
-        // if (redian < Math.PI) {
-        // }
-        // if (redian < Math.PI) {
-        //   redian = Math.PI - redian
-        // } else {
-        //   redian += (90 * Math.PI) / 180
-        // }
-
-        // let azimuthRadian = redian
+        let redian = -azimuthVec.angle() + (150 * Math.PI) / 180
 
         const num = Math.round((control.azimuthAngle - redian) / (2 * Math.PI))
         const azimuthRadian = num * 2 * Math.PI + redian

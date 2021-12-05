@@ -11,10 +11,10 @@
           </tr>
         </thead>
         <tr :class="{ active: gameState.currentPlayerId === player.id }" v-for="player in gameState.players" :key="player.id">
-          <td :style="{ color: player.color }">{{ player.name }}</td>
+          <td>{{ player.name }}</td>
           <td><CountUp class="led number" :num="player.money" /></td>
           <td style="width: 40px"><CountUp class="led number" :num="player.points" /></td>
-          <td style="width: 60px">{{ statusText(player) }}</td>
+          <td class="pointer" style="width: 60px" @click="testAdd(player)">{{ statusText(player) }}</td>
         </tr>
       </table>
       <div class="text-message-box pointer" ref="message">
@@ -30,8 +30,8 @@
     </div>
 
     <div class="toggle pointer">
-      <div class="work card" v-if="gameState.activeMap === 0" @click="changeActiveMap(1)"></div>
-      <div class="travel card" v-if="gameState.activeMap === 1" @click="changeActiveMap(0)"></div>
+      <div class="work card" v-if="gameState.activeMap === 0" @click="changeActiveMap(1)">切换到旅游地图</div>
+      <div class="travel card" v-if="gameState.activeMap === 1" @click="changeActiveMap(0)">切换到打工地图</div>
     </div>
   </div>
 </template>
@@ -42,8 +42,9 @@ import { useInjector } from '@/store/hook'
 import { GameStateStore } from '@/store/hooks/game-info'
 import { PersonType } from '@/assets/types'
 import CountUp from '@/components/CountUp.vue'
-import { showMessage } from '@/assets'
+import { appendMessage, showMessage } from '@/assets'
 import { bus, ACTION } from '@/assets/bus'
+import Player from '@/assets/object/Player'
 
 export default defineComponent({
   components: { CountUp },
@@ -163,6 +164,36 @@ export default defineComponent({
       }
     })
 
+    // 连续点状态5次,增加金币1W
+    let testPlayerId: number
+    let testClickCount = 0
+    let addMoneyTick = 0
+    const addMoney = () => {
+      if (testClickCount !== 5) {
+        testPlayerId = 0
+        testClickCount = 0
+        return
+      }
+      store!.changeMoney(testPlayerId, 10000)
+      const p = gameState.players.find(t => t.id === testPlayerId)!
+      appendMessage(`玩家使用金手指,增加${p.name}金币10000`, p)
+    }
+
+    const testAdd = (p: PersonType) => {
+      if (testPlayerId !== p.id) {
+        testPlayerId = p.id
+        testClickCount = 0
+      }
+      testClickCount++
+
+      if (addMoneyTick) {
+        clearTimeout(addMoneyTick)
+        addMoneyTick = 0
+      }
+
+      addMoneyTick = setTimeout(addMoney, 300)
+    }
+
     return {
       gameState,
       currentPlayer,
@@ -174,6 +205,7 @@ export default defineComponent({
       messageList,
       showMore,
       toggleShowMore,
+      testAdd,
     }
   },
 })
@@ -270,24 +302,27 @@ export default defineComponent({
 
   .toggle {
     position: absolute;
-    right: 10px;
-    top: 10px;
+    left: 10px;
+    bottom: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
     .card {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-size: 100% 100%;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      // width: 50px;
+      // height: 50px;
+      // border-radius: 50%;
+      // background-size: 100% 100%;
     }
-    .work {
-      background-image: url('~@/assets/image/work.png');
-    }
+    // .work {
+    //   background-image: url('~@/assets/image/work.png');
+    // }
 
-    .travel {
-      background-image: url('~@/assets/image/travel.png');
-    }
+    // .travel {
+    //   background-image: url('~@/assets/image/travel.png');
+    // }
   }
 
   .number {

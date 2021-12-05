@@ -4,7 +4,7 @@
     <ThreeWrap>
       <WorkMap @over="map1Init" ref="workMap" />
       <TravelMap @over="map2Init" ref="travelMap" />
-      <HandUpDisplay v-if="isFinish" :enabled="enabled" />
+      <HeadUpDisplay v-if="isFinish" :enabled="enabled" />
       <TouchView ref="touchRef" />
       <NumberView ref="numberRef" />
       <!-- <TextView ref="textRef" /> -->
@@ -23,7 +23,7 @@ import { GameStateStore } from '@/store/hooks/game-info'
 import ThreeWrap from './ThreeWrap.vue'
 import WorkMap from './WorkMap.vue'
 import TravelMap from './TravelMap.vue'
-import HandUpDisplay from './HandUpDisplay.vue'
+import HeadUpDisplay from './HeadUpDisplay.vue'
 import { delay, showMessage, confirm, setItem, removeItem, appendMessage } from '@/assets/index'
 import { FileItem, getFileById } from '@/assets/preload'
 import Player from '@/assets/object/Player'
@@ -40,8 +40,7 @@ import { MapAddress, PersonType, PointType } from '@/assets/types'
 import { workMapList } from '@/assets/setting'
 import { chooseStartPoint, chooseGoTravel, chooseTravelContinue, getStep } from '@/assets/ai'
 export default defineComponent({
-  components: { ThreeWrap, WorkMap, TravelMap, HandUpDisplay, TouchView, NumberView, RewardView, StepNumber, WinView, OverView },
-  // components: { HandUpDisplay },
+  components: { ThreeWrap, WorkMap, TravelMap, HeadUpDisplay, TouchView, NumberView, RewardView, StepNumber, WinView, OverView },
   setup(props, { emit }) {
     const numberRef = ref<InstanceType<typeof NumberView>>()
     const workMap = ref<InstanceType<typeof WorkMap>>()
@@ -155,7 +154,7 @@ export default defineComponent({
       }
 
       // 聚焦当前玩家
-      // workMap.value!.lookAtPosition(player!.instance.position)
+      workMap.value!.lookAtPosition(player!.instance.position)
 
       if (!player.player.isAI) enabled.value = true
 
